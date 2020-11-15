@@ -1,0 +1,34 @@
+/*
+Reference: https://fdossena.com/?p=html5cool/buttons/i.frag
+*/
+
+.menu-button {
+	display: inline-block;
+	width: 250px;
+
+	padding: 0.35em 1.2em;
+	border: 0.05em solid #000000;
+	margin: 10px 10px 5px;
+	box-sizing: border-box;
+
+	text-decoration: none;
+	font-family: "menlo", sans-serif;
+	font-weight: 300;
+	font-size: 25px;
+	color: #000000;
+	text-align: center;
+
+	transition: all 0.2s;
+}
+
+.menu-button:hover {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+@media all and (max-width: 30em) {
+	.menu-button {
+		display: block;
+		margin: 0.4em auto;
+	}
+}
