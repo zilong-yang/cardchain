@@ -1,0 +1,9 @@
+*:focus {
+	outline: none;
+}
+
+.buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
