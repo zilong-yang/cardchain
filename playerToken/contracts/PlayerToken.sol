@@ -41,6 +41,7 @@ contract PlayerToken is ERC721Full {
         
     }
     
+    //Change the stats of a given token, must be authroized account
     function changeStats(uint256 tokenId, uint8[3] memory stats) public authorize {
        
        //dont really need this unless we do somthing before calling this
@@ -56,7 +57,7 @@ contract PlayerToken is ERC721Full {
     
     
     
-    
+    //add authrized accounts
     function addAuthorizeAccount(address _account) public  {
         require(msg.sender == authority, "Must be head authority to call this function");
         //require account is not already authroized
