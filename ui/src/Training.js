@@ -1,5 +1,5 @@
 import React from 'react';
-import './Placeholder.css';
+import './stylesheets/Placeholder.css';
 
 export default class TrainingView extends React.Component {
 

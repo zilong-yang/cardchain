@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import './Menu.css';
-import './MenuButton.css';
+import './stylesheets/Menu.css';
+import './stylesheets/MenuButton.css';
 
 class MenuButton extends Component {
 

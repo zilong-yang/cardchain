@@ -1,0 +1,37 @@
+table {
+	margin: 0 auto;
+	width: 50%;
+}
+
+td, th {
+	padding: 10px;
+}
+
+thead {
+	background-color: dimgray;
+}
+
+thead th {
+	font-size: larger;
+	color: white;
+}
+
+tbody th {
+	font-weight: normal;
+}
+
+th {
+	/*background-color: lightblue;*/
+}
+
+tbody tr {
+	background-color: antiquewhite;
+}
+
+tbody tr:nth-child(even) {
+	background-color: white;
+}
+
+tbody tr:hover {
+	background-color: lightgray;
+}
