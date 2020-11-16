@@ -4,12 +4,25 @@ import './MenuButton.css';
 
 class MenuButton extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.render = this.render.bind(this);
+    }
+
+    handleClick() {
+        this.props.action(this.props.name);
+    }
+
     render() {
         return (
             <div>
-                <button className="menu-button">
-                    {this.props.name}
-                </button>
+                <input
+                    type="button"
+                    value={this.props.name}
+                    className="menu-button"
+                    onClick={this.handleClick.bind(this)}
+                />
             </div>
         );
     }
@@ -17,14 +30,24 @@ class MenuButton extends Component {
 
 export class Menu extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.clickedTab = this.clickedTab.bind(this);
+    }
+
+    clickedTab(tab) {
+        this.props.switchTab(tab);
+    }
+
     render() {
         return (
             <div>
                 <div className="buttons">
-                    <MenuButton name="Library" />
-                    <MenuButton name="Marketplace" />
-                    <MenuButton name="Train" />
-                    <MenuButton name="Compete" />
+                    <MenuButton name="library" action={this.clickedTab} />
+                    <MenuButton name="marketplace" action={this.clickedTab} />
+                    <MenuButton name="training" action={this.clickedTab} />
+                    <MenuButton name="lobby" action={this.clickedTab} />
                 </div>
                 <hr />
             </div>
