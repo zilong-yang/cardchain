@@ -13,23 +13,16 @@ async componentWillMount(){
     await this.loadBlockchainData()
     
 }
-
+//Gets account data from metamask and sets state account to first account
 async loadBlockchainData(){
         const web3  = window.web3
 
         const accounts = await web3.eth.getAccounts()
-        console.log("account",  accounts[0])
+        //console.log("account",  accounts[0])
         this.setState({account: accounts[0]})
 }
 
-async getMetaMaskAccount(){
-    const web3  = window.web3
-    const accounts = await web3.eth.getAccounts()
-
-    return (accounts[0]);
-}
-
-
+//Confirms that metamask is connected and sets web3 to appropriate web3.
 async loadWeb3(){
     
     if(window.ethereum){
