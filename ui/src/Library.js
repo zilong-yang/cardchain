@@ -37,6 +37,7 @@ export class LibraryView extends React.Component {
                             </tr>
                         </tbody>
                     </table>
+                    <h1>{this.props.tokenBalance}</h1>
                 </div>
 
                 {/*<div className="placeholder">
