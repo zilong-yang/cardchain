@@ -5,6 +5,8 @@
 /ui/.pnp
 /ui/.pnp.js
 
+/playerToken/node_modules
+
 # testing
 /ui/coverage
 

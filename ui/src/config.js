@@ -1,26 +1,23 @@
 import Web3 from 'web3';
 //const web3=new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
-
-if(window.ethereum){
+// load web3
+// Confirms that metamask if connected and sets web3 to appropriate provider
+if (window.ethereum) {
     window.web3 = new Web3(window.ethereum)
     await window.ethereum.enable()
-}
-else if (window.web3) {
+} else if (window.web3) {
     window.web3 = new Web3(window.web3.currentProvider)
-}
-else {
+} else {
     window.alert('Non-Ethereum browser detected. You should consider trying metamask!')
 }
 
 //get metamask account
-
-const web3  = window.web3
-    
+const web3 = window.web3
 const accounts = await web3.eth.getAccounts()
 
-//authority account
-//update each time you deploy a local network with ganache
+// authority account
+// update each time you deploy a local network with ganache
 let headAuthority = '0xa928e88Dc27A56dF2F6646A82EE25BDA261acd59'
 
 
@@ -31,11 +28,11 @@ let gameABI = [{"inputs":[{"internalType":"address","name":"_authority","type":"
 let playerTokenAddress='0x152F335CacaF724f5677cAB116fE54A2dd9cf202'
 let gameAddress = '0x7F50659a28739d4fAC408c9cf23cCfcBDa3FedF8'
 
-const playerTokenContract=new web3.eth.Contract(playerTokenABI, playerTokenAddress)
+const playerTokenContract = new web3.eth.Contract(playerTokenABI, playerTokenAddress)
 const gameContract = new web3.eth.Contract(gameABI, gameAddress)
 
-//sets fallback from account to authrority account
+// sets fallback from account to authority account
 playerTokenContract.options.address = headAuthority
 gameContract.options.address = headAuthority
 
-export{playerTokenContract, gameContract, headAuthority};
+export {playerTokenContract, gameContract, headAuthority, accounts};

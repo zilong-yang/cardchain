@@ -1,4 +1,3 @@
-
 // File: @openzeppelin/contracts/introspection/IERC165.sol
 
 pragma solidity ^0.5.0;
@@ -69,10 +68,13 @@ contract IERC721 is IERC165 {
      * either `approve` or `setApproveForAll`.
      */
     function transferFrom(address from, address to, uint256 tokenId) public;
+
     function approve(address to, uint256 tokenId) public;
+
     function getApproved(uint256 tokenId) public view returns (address operator);
 
     function setApprovalForAll(address operator, bool _approved) public;
+
     function isApprovedForAll(address owner, address operator) public view returns (bool);
 
 
@@ -242,7 +244,7 @@ library Address {
 
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
-        assembly { size := extcodesize(account) }
+        assembly {size := extcodesize(account)}
         return size > 0;
     }
 }
@@ -358,8 +360,8 @@ contract ERC721 is ERC165, IERC721 {
     using SafeMath for uint256;
     using Address for address;
     using Counters for Counters.Counter;
-    
-    struct stats{
+
+    struct stats {
         uint8 stamina;
         uint8 strength;
         uint8 elusive;
@@ -370,19 +372,19 @@ contract ERC721 is ERC165, IERC721 {
     bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
 
     // Mapping from token ID to owner
-    mapping (uint256 => address) private _tokenOwner;
+    mapping(uint256 => address) private _tokenOwner;
 
     // Mapping from token ID to approved address
-    mapping (uint256 => address) private _tokenApprovals;
+    mapping(uint256 => address) private _tokenApprovals;
 
     // Mapping from owner to number of owned token
-    mapping (address => Counters.Counter) private _ownedTokensCount;
+    mapping(address => Counters.Counter) private _ownedTokensCount;
 
     // Mapping from owner to operator approvals
-    mapping (address => mapping (address => bool)) private _operatorApprovals;
-    
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+
     // mapping of tokenID to stats struct
-    mapping (uint256 => stats) private _tokenStats;
+    mapping(uint256 => stats) private _tokenStats;
 
     /*
      *     bytes4(keccak256('balanceOf(address)')) == 0x70a08231
@@ -414,19 +416,19 @@ contract ERC721 is ERC165, IERC721 {
         //require that tokenId exists
         address owner = _tokenOwner[tokenId];
         require(owner != address(0), "ERC721: owner query for nonexistent token");
-        
-        
+
+
         _tokenStats[tokenId].stamina = statPoints[0];
         _tokenStats[tokenId].strength = statPoints[1];
         _tokenStats[tokenId].elusive = statPoints[2];
 
     }
-    
+
     function _getStats(uint256 tokenId) public view returns (uint8[] memory){
         //require that tokenId exists
         address owner = _tokenOwner[tokenId];
         require(owner != address(0), "ERC721: owner query for nonexistent token");
-        
+
         uint8[] memory statsArray = new uint8[](3);
         statsArray[0] = _tokenStats[tokenId].stamina;
         statsArray[1] = _tokenStats[tokenId].strength;
@@ -596,24 +598,24 @@ contract ERC721 is ERC165, IERC721 {
 
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to].increment();
-    
+
         emit Transfer(address(0), to, tokenId);
     }
-    
+
     function _mintWithStats(address to, uint256 tokenId, uint8[3] memory statPoints) internal {
         require(to != address(0), "ERC721: mint to the zero address");
         require(!_exists(tokenId), "ERC721: token already minted");
 
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to].increment();
-        
+
 
         emit Transfer(address(0), to, tokenId);
-        
+
         _tokenStats[tokenId].stamina = statPoints[0];
         _tokenStats[tokenId].strength = statPoints[1];
         _tokenStats[tokenId].elusive = statPoints[2];
-        
+
     }
 
     /**
@@ -676,7 +678,7 @@ contract ERC721 is ERC165, IERC721 {
      * @return bool whether the call correctly returned the expected magic value
      */
     function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data)
-        internal returns (bool)
+    internal returns (bool)
     {
         if (!to.isContract()) {
             return true;
@@ -695,8 +697,8 @@ contract ERC721 is ERC165, IERC721 {
             _tokenApprovals[tokenId] = address(0);
         }
     }
-    
-    
+
+
 }
 
 // File: @openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol
@@ -710,6 +712,7 @@ pragma solidity ^0.5.0;
  */
 contract IERC721Enumerable is IERC721 {
     function totalSupply() public view returns (uint256);
+
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256 tokenId);
 
     function tokenByIndex(uint256 index) public view returns (uint256);
@@ -879,8 +882,10 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         if (tokenIndex != lastTokenIndex) {
             uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
 
-            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+            _ownedTokens[from][tokenIndex] = lastTokenId;
+            // Move the last token to the slot of the to-delete token
+            _ownedTokensIndex[lastTokenId] = tokenIndex;
+            // Update the moved token's index
         }
 
         // This also deletes the contents at the last position of the array
@@ -907,8 +912,10 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
         uint256 lastTokenId = _allTokens[lastTokenIndex];
 
-        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        _allTokens[tokenIndex] = lastTokenId;
+        // Move the last token to the slot of the to-delete token
+        _allTokensIndex[lastTokenId] = tokenIndex;
+        // Update the moved token's index
 
         // This also deletes the contents at the last position of the array
         _allTokens.length--;
@@ -927,15 +934,15 @@ pragma solidity ^0.5.0;
  */
 contract IERC721Metadata is IERC721 {
     function name() external view returns (string memory);
+
     function symbol() external view returns (string memory);
+
     function tokenURI(uint256 tokenId) external view returns (string memory);
 }
 
 // File: @openzeppelin/contracts/token/ERC721/ERC721Metadata.sol
 
 pragma solidity ^0.5.0;
-
-
 
 
 contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
