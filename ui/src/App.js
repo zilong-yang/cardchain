@@ -28,14 +28,27 @@ class App extends React.Component {
 
         this.state = {
             tab: CURRENT_INTERFACE.LIBRARY,
-            metaMaskAccount: accounts[0],
+            account: '0x',
             auth : headAuthority,
             playerTokenContract: playerTokenContract,
             gameContract: gameContract,
             balanceOfTokens : 0
         };
-        
+
+        this.getAccount = this.getAccount.bind(this);
         this.tabClicked = this.tabClicked.bind(this);
+
+        this.getAccount();
+    }
+
+    getAccount() {
+        const web3 = window.web3;
+        const accounts = web3.eth.getAccounts()
+
+        let app = this;
+        accounts.then((acc) => {
+            app.setState({account: acc[0]});
+        });
     }
 
     tabClicked(tab) {
@@ -54,16 +67,17 @@ class App extends React.Component {
             .call().then((_balance) => {
                 console.log(_balance);
         })
-        //console.log(balance);
         return(balance);
     }
     
     render() {
+        let app = this;
+
         return (
             <div>
                 <Menu switchTab={this.tabClicked} />
                 {this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView /> : null}
+                    <LibraryView account={app.state.account} /> : null}
                 {this.state.tab === CURRENT_INTERFACE.MARKET ?
                     <MarketView /> : null}
                 {this.state.tab === CURRENT_INTERFACE.TRAINING ?

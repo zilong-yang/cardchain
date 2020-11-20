@@ -1,6 +1,9 @@
 import React from 'react';
+import Web3 from 'web3';
 import './stylesheets/Placeholder.css';
 import './stylesheets/Library.css';
+
+const web3 = window.web3;
 
 export class LibraryView extends React.Component {
 
@@ -10,6 +13,7 @@ export class LibraryView extends React.Component {
 
         return (
             <div>
+                <h1 align="center">Account: {this.props.account}</h1>
                 <div id="library-table-div">
                     <table id="library-table">
                         <thead>
