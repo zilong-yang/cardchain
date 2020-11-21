@@ -1,14 +1,15 @@
 import React from 'react';
 import Web3 from 'web3'
+
 import { Menu } from "./Menu";
-
-
 import { LibraryView } from "./Library";
 import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import {playerTokenContract, gameContract, headAuthority, accounts} from "./config";
+import {playerTokenContract, headAuthority, accounts} from "./config";
+import './Game';
+import {giveToken, getTokens, testFunction} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -16,6 +17,8 @@ const CURRENT_INTERFACE = {
     TRAINING: 'training',
     LOBBY: 'lobby'
 };
+
+const isValidAddress = (address) => (address !== undefined && address !== '0x');
 
 /*
  * Current Issues:
@@ -30,15 +33,36 @@ class App extends React.Component {
             tab: CURRENT_INTERFACE.LIBRARY,
             account: '0x',
             auth : headAuthority,
-            playerTokenContract: playerTokenContract,
-            gameContract: gameContract,
+            // playerTokenContract: playerTokenContract,
+            // gameContract: gameContract,
             balanceOfTokens : 0
         };
 
+        this.init = this.init.bind(this);
         this.getAccount = this.getAccount.bind(this);
         this.tabClicked = this.tabClicked.bind(this);
 
-        this.getAccount();
+        this.init();
+        // promise.then(() => {
+        //     if (this.state.account !== '0x') {
+        //         console.log(this.state.account);
+        //         giveToken(this.state.account, [1, 2, 3]);
+        //     }
+        // });
+    }
+
+    init() {
+        let app = this;
+        this.getAccount().then(function() {
+            let acc = app.state.account;
+            if (isValidAddress(acc)) {
+                testFunction(acc);
+                giveToken(app.state.account, [1, 2, 3]);
+                getTokens().call().then((tokens) => {
+                    console.log(tokens);
+                }).catch(console.log);
+            }
+        });
     }
 
     getAccount() {
@@ -46,10 +70,20 @@ class App extends React.Component {
         const accounts = web3.eth.getAccounts()
 
         let app = this;
-        accounts.then((acc) => {
-            app.setState({account: acc[0]});
+        return accounts.then((accounts) => {
+            if (isValidAddress(accounts[0])) {
+                app.setState({account: accounts[0]});
+                console.log("getAccount: " + app.state.account);
+            }
         });
     }
+
+    /*getTokens(address) {
+        playerTokenContract.methods.balanceOf(address).call((err, tokens) => {
+            console.log(err);
+            console.log(tokens);
+        });
+    }*/
 
     tabClicked(tab) {
         this.setState({tab: tab});
@@ -57,7 +91,7 @@ class App extends React.Component {
 
     //retrieves the number of tokens that account has
     //todo NEEDS A LOT OF WORK
-    getBalanceOfTokens(account){
+    /*getBalanceOfTokens(account){
         if(this.state.playerTokenContract == null){
             return(-1);
         }
@@ -68,7 +102,7 @@ class App extends React.Component {
                 console.log(_balance);
         })
         return(balance);
-    }
+    }*/
     
     render() {
         let app = this;

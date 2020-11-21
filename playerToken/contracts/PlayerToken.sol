@@ -22,6 +22,10 @@ contract PlayerToken is ERC721Full {
         _;
     }
 
+    function test(address owner) public pure returns (uint) {
+        return 5;
+    }
+
     //create new PlayerTokens
     function mint(address _to, string memory _tokenURI, uint8[3] memory stats) public authorize returns (bool){
         //id is the number of token (mint number)
@@ -43,6 +47,10 @@ contract PlayerToken is ERC721Full {
         _changeStats(tokenId, stats);
     }
 
+    // Returns a list of tokenIDs owned by owner
+    function tokensOf(address owner) public authorize returns (uint256[] memory) {
+        return _tokensOfOwner(owner);
+    }
 
     //checks if given account is authorized
     function isAuthorized(address check) private view returns (bool){
