@@ -9,12 +9,9 @@ contract PlayerToken is ERC721Full {
     //only authorized accounts can change token variables
     mapping(address => bool) authorizedAccounts;
 
-    uint public tokenCount;
-
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
         authority = _authority;
         authorizedAccounts[_authority] = true;
-        tokenCount = 0;
     }
 
     modifier authorize{
@@ -25,34 +22,31 @@ contract PlayerToken is ERC721Full {
         _;
     }
 
-//    function test(address owner) public pure returns (uint) {
-//        return 5;
-//    }
-
     //create new PlayerTokens
     function mint(address _to, string memory _tokenURI, uint8[3] memory stats) public authorize returns (bool){
         //id is the number of token (mint number)
         uint256 _tokenId = totalSupply().add(1);
 
+        // new method to mint
+        _mint(_to, _tokenId);
+        changeStats(_tokenId, stats);
+
         //call ERC721 mint function to mint a new token
-        _mintWithStats(_to, _tokenId, stats);
+//        _mintWithStats(_to, _tokenId, stats);
 
         //set the newly minted token's URI to passed URI
-//        _setTokenURI(_tokenId, _tokenURI);
-        tokenCount++;
+        _setTokenURI(_tokenId, _tokenURI);
         return true;
     }
 
     //Change the stats of a given token, must be authorized account
     function changeStats(uint256 tokenId, uint8[3] memory stats) public authorize {
-
         //dont really need this unless we do something before calling this
-
         _changeStats(tokenId, stats);
     }
 
     // Returns a list of tokenIDs owned by owner
-    function tokensOf(address owner) public authorize returns (uint256[] memory) {
+    function tokensOfOwner(address owner) public view authorize returns (uint256[] memory) {
         return _tokensOfOwner(owner);
     }
 
@@ -70,10 +64,6 @@ contract PlayerToken is ERC721Full {
         //add account to authorizedAccounts
         authorizedAccounts[_account] = true;
 
-    }
-
-    function tokensOfOwner(address owner) public view returns (uint256[] memory) {
-        return _tokensOfOwner(owner);
     }
 
 }

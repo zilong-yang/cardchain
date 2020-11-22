@@ -1,5 +1,4 @@
 import React from 'react';
-import Web3 from 'web3'
 
 import { Menu } from "./Menu";
 import { LibraryView } from "./Library";
@@ -8,8 +7,7 @@ import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
 import {playerTokenContract, headAuthority} from "./config";
-import './Game';
-import {giveToken, balanceOf, getStats, testFunction} from "./Game";
+import {giveToken, balanceOf, getStats, tokensOfOwner, totalSupply, testFunction} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -19,6 +17,8 @@ const CURRENT_INTERFACE = {
 };
 
 const isValidAddress = (address) => (address !== undefined && address !== '0x');
+
+const shortAddress = (address) => (address.substr(0, 6) + "...");
 
 /*
  * Current Issues:
@@ -43,12 +43,6 @@ class App extends React.Component {
         this.tabClicked = this.tabClicked.bind(this);
 
         this.init();
-        // promise.then(() => {
-        //     if (this.state.account !== '0x') {
-        //         console.log(this.state.account);
-        //         giveToken(this.state.account, [1, 2, 3]);
-        //     }
-        // });
     }
 
     init() {
@@ -57,23 +51,24 @@ class App extends React.Component {
             let acc = app.state.account;
             if (isValidAddress(acc)) {
                 balanceOf(acc).then((balance) => {
-                    console.log("Balance of " + acc.substr(0, 6) + "... = " + balance);
-                    if (balance < 1) {
+                    console.log("Balance of " + shortAddress(acc) + " = " + balance);
+                    if (balance < 3) {
                         giveToken(app.state.account, [1, 2, 3]);
                     }
                 });
 
-                let tokenID = 1;
+                let tokenID = 3;
                 getStats(tokenID).then((stats) => {
-                    console.log("Token " + tokenID + "\n" +
+                    console.log("TokenID: " + tokenID + "\n" +
                         "\tstamina = " + stats[0] + "\n" +
                         "\tstrength = " + stats[1] + "\n" +
                         "\telusive = " + stats[2])
+                }).catch(() => {
+                    console.log("TokenID " + tokenID + " does not exist");
                 })
-                testFunction([1]);
-                // getTokens().call().then((tokens) => {
-                //     console.log(tokens);
-                // }).catch(console.log);
+
+                // testFunction([acc]);
+                totalSupply().then((supply) => {console.log("Total tokens = " + supply)});
             }
         });
     }
@@ -87,36 +82,14 @@ class App extends React.Component {
             if (isValidAddress(accounts[0])) {
                 app.setState({account: accounts[0]});
                 if (isValidAddress(app.state.account))
-                    console.log("getAccount: " + app.state.account);
+                    console.log("getAccount: " + shortAddress(app.state.account));
             }
         });
     }
 
-    /*getTokens(address) {
-        playerTokenContract.methods.balanceOf(address).call((err, tokens) => {
-            console.log(err);
-            console.log(tokens);
-        });
-    }*/
-
     tabClicked(tab) {
         this.setState({tab: tab});
     }
-
-    //retrieves the number of tokens that account has
-    //todo NEEDS A LOT OF WORK
-    /*getBalanceOfTokens(account){
-        if(this.state.playerTokenContract == null){
-            return(-1);
-        }
-        let balance = 1
-        
-        this.state.playerTokenContract.methods.balanceOf(account)
-            .call().then((_balance) => {
-                console.log(_balance);
-        })
-        return(balance);
-    }*/
     
     render() {
         let app = this;

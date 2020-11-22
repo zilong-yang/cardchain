@@ -1,26 +1,30 @@
-// import Web3 from 'web3';
-import React from 'react';
 import {playerTokenContract} from "./config";
 
-const web3 = window.web3;
+// const web3 = window.web3;
+
+const playerMethods = playerTokenContract.methods;
 
 export const giveToken = (address, stats) => {
-    playerTokenContract.methods.mint(address, "123456", stats).send({from: address, gas: 1000000}, (err, txHash) => {
-        if (err) {
-            console.log("Failed to give token to " + address);
-            console.log(err);
-        } else {
-            console.log("Added a token to " + address.substr(0, 6) + "...");
-        }
+    playerMethods.mint(address, "", stats).send({from: address, gas: 1000000}, (err) => {
+            if (err) {
+                console.log("Failed to give token to " + address);
+                console.log(err);
+            } else {
+                console.log("Added a token to " + address.substr(0, 6) + "...");
+            }
     });
 };
 
-export const balanceOf = (address) => (playerTokenContract.methods.balanceOf(address).call());
+export const balanceOf = (address) => (playerMethods.balanceOf(address).call());
 
-export const getStats = (tokenID) => (playerTokenContract.methods._getStats(tokenID).call());
+export const getStats = (tokenID) => (playerMethods._getStats(tokenID).call());
+
+export const tokensOfOwner = (owner) => (playerMethods.tokensOfOwner(owner).call());
+
+export const totalSupply = () => (playerMethods.totalSupply().call());
 
 export const testFunction = (args) => {
-    playerTokenContract.methods._getStats(args[0]).call().then((val) => {
-        console.log("test function: " + val[0]);
+    playerMethods.totalSupply().call().then((val) => {
+        console.log("test function: " + val);
     }).catch(console.log);
 }
