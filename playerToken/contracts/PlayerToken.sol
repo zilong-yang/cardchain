@@ -9,9 +9,12 @@ contract PlayerToken is ERC721Full {
     //only authorized accounts can change token variables
     mapping(address => bool) authorizedAccounts;
 
+    uint public tokenCount;
+
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
         authority = _authority;
         authorizedAccounts[_authority] = true;
+        tokenCount = 0;
     }
 
     modifier authorize{
@@ -22,9 +25,9 @@ contract PlayerToken is ERC721Full {
         _;
     }
 
-    function test(address owner) public pure returns (uint) {
-        return 5;
-    }
+//    function test(address owner) public pure returns (uint) {
+//        return 5;
+//    }
 
     //create new PlayerTokens
     function mint(address _to, string memory _tokenURI, uint8[3] memory stats) public authorize returns (bool){
@@ -35,7 +38,8 @@ contract PlayerToken is ERC721Full {
         _mintWithStats(_to, _tokenId, stats);
 
         //set the newly minted token's URI to passed URI
-        _setTokenURI(_tokenId, _tokenURI);
+//        _setTokenURI(_tokenId, _tokenURI);
+        tokenCount++;
         return true;
     }
 
@@ -68,5 +72,8 @@ contract PlayerToken is ERC721Full {
 
     }
 
+    function tokensOfOwner(address owner) public view returns (uint256[] memory) {
+        return _tokensOfOwner(owner);
+    }
 
 }

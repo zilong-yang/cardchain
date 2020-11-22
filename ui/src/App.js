@@ -7,9 +7,9 @@ import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import {playerTokenContract, headAuthority, accounts} from "./config";
+import {playerTokenContract, headAuthority} from "./config";
 import './Game';
-import {giveToken, getTokens, testFunction} from "./Game";
+import {giveToken, balanceOf, getStats, testFunction} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -56,11 +56,24 @@ class App extends React.Component {
         this.getAccount().then(function() {
             let acc = app.state.account;
             if (isValidAddress(acc)) {
-                testFunction(acc);
-                giveToken(app.state.account, [1, 2, 3]);
-                getTokens().call().then((tokens) => {
-                    console.log(tokens);
-                }).catch(console.log);
+                balanceOf(acc).then((balance) => {
+                    console.log("Balance of " + acc.substr(0, 6) + "... = " + balance);
+                    if (balance < 1) {
+                        giveToken(app.state.account, [1, 2, 3]);
+                    }
+                });
+
+                let tokenID = 1;
+                getStats(tokenID).then((stats) => {
+                    console.log("Token " + tokenID + "\n" +
+                        "\tstamina = " + stats[0] + "\n" +
+                        "\tstrength = " + stats[1] + "\n" +
+                        "\telusive = " + stats[2])
+                })
+                testFunction([1]);
+                // getTokens().call().then((tokens) => {
+                //     console.log(tokens);
+                // }).catch(console.log);
             }
         });
     }
@@ -73,7 +86,8 @@ class App extends React.Component {
         return accounts.then((accounts) => {
             if (isValidAddress(accounts[0])) {
                 app.setState({account: accounts[0]});
-                console.log("getAccount: " + app.state.account);
+                if (isValidAddress(app.state.account))
+                    console.log("getAccount: " + app.state.account);
             }
         });
     }
