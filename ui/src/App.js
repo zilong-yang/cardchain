@@ -2,15 +2,14 @@
 import React, { Component } from 'react';
 //import { render } from 'react-dom';
 import Web3 from 'web3'
+
 import { Menu } from "./Menu";
-
-
 import { LibraryView } from "./Library";
 import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import {_playerTokenContract, _gameContract, _headAuthority} from "./config";
+import PlayerToken from "./PlayerToken.json"
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -27,11 +26,11 @@ Figure out how to actually send the contract, make sure the contract is created 
 */
 class App extends React.Component {
     async componentDidMount(){
-        //await this.loadWeb3()
-       // await this.loadBlockchainData()
+        await this.loadWeb3()
+        await this.loadBlockchainData()
         //await this.generateContracts()
         //make sure that this code executes before calling other functions
-        //this.setState({ready:true})
+    
     }
 
    // async componentDidMount(){
@@ -43,6 +42,25 @@ class App extends React.Component {
     
             const accounts = await web3.eth.getAccounts()
             this.setState({metaMaskAccount: accounts[0]})
+            //console.log(this.state.metaMaskAccount)
+
+            const networkID  = await web3.eth.net.getId()
+            const playerTokenContractData = PlayerToken.networks[networkID]
+            if(playerTokenContractData){
+            const playerAbi = PlayerToken.abi 
+            const playerAddress = playerTokenContractData.address
+            const playerTokenContract = new  web3.eth.Contract(playerAbi, playerAddress)
+            //console.log(playerTokenContract)
+            this.setState({playerTokenContract:playerTokenContract})
+            //console.log(this.state.playerTokenContract)
+            //console.log(playerTokenContract.methods)
+            console.log(this.state.playerTokenContract.methods)
+            playerTokenContract.methods.getApproved().send()
+            }
+            else{
+                console.log("Smart contract PlayerToken not deployed to network!")
+            }
+            //const gameContract
     }
     
     //Confirms that metamask is connected and sets web3 to appropriate web3.
@@ -127,10 +145,10 @@ class App extends React.Component {
         this.state = {
             tab: CURRENT_INTERFACE.LIBRARY,
             metaMaskAccount: '0x',
-            Authorityaccount : _headAuthority,
-            playerTokenContract: _playerTokenContract,
-            gameContract:  _gameContract,
-            balanceOfTokens : 0
+            Authorityaccount : '',
+            playerTokenContract: '',
+            gameContract:  '',
+          
         };
         
         this.tabClicked = this.tabClicked.bind(this);
