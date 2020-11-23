@@ -4,6 +4,7 @@
 /ui/node_modules
 /ui/.pnp
 /ui/.pnp.js
+/playerToken/node_modules
 
 # testing
 /ui/coverage
@@ -23,3 +24,6 @@
 /ui/yarn-error.log*/ui/
 
 /.idea
+
+# truffle
+/playerToken/build

@@ -1,8 +1,8 @@
 pragma solidity >=0.4.22 <0.7.0;
 /**
-*@author Ben Meagher
-*
-*
+ *@author Ben Meagher
+ *
+ *
  */
 contract TokenGame{
     //default state is Create
@@ -11,7 +11,7 @@ contract TokenGame{
     //PlayerStruct used for Game struct
     struct Player{
         uint256 Id;
-        //cash out addess
+        //cash out address
         address payable wallet;
     }
     
@@ -44,8 +44,8 @@ contract TokenGame{
         require(
             isAuthorized(msg.sender),
             "Only a authorized account can call this function"
-            );
-            _;
+        );
+        _;
     }
     
     constructor(address _authority, address payable _serviceFund) public {
@@ -98,7 +98,7 @@ contract TokenGame{
         g.state = gameState.inGame;
     }
     
-    //only authrorized accounts can call, ends game and pays out winner and serviceFee. Puts game in end state
+    //only authorized accounts can call, ends game and pays out winner and serviceFee. Puts game in end state
     function endGame(uint256 winnerId, uint256 gameId) public authorize {
         require(lobbies[gameId].state == gameState.inGame, "Game must be in inGame state.");
         //require winnerId is one of the games Players
@@ -132,10 +132,10 @@ contract TokenGame{
     
     
     
-    //authroity account can add authroirzed accounts to list
+    //authority account can add authority accounts to list
     function addAuthorizeAccount(address _account) public  {
         require(msg.sender == authority, "Must be head authority to call this function");
-        //require account is not already authroized
+        //require account is not already authorized
         require(!authorizedAccounts[_account], "Account must not already be authorized");
         
         //add account to authorizedAccounts
