@@ -20,10 +20,6 @@ const isValidAddress = (address) => (address !== undefined && address !== '0x');
 
 const shortAddress = (address) => (address.substr(0, 6) + "...");
 
-/*
- * Current Issues:
- * Figure out how to actually send the contract, make sure the contract is created properly
- */
 class App extends React.Component {
 
     constructor(props) {
@@ -33,44 +29,18 @@ class App extends React.Component {
             tab: CURRENT_INTERFACE.LIBRARY,
             account: '0x',
             auth : headAuthority,
-            // playerTokenContract: playerTokenContract,
-            // gameContract: gameContract,
-            balanceOfTokens : 0
+            balance: 0,
+
+            tokens: [],
         };
 
-        this.init = this.init.bind(this);
+        this.updateState = this.updateState.bind(this);
         this.getAccount = this.getAccount.bind(this);
         this.tabClicked = this.tabClicked.bind(this);
 
-        this.init();
-    }
-
-    init() {
-        let app = this;
-        this.getAccount().then(function() {
-            let acc = app.state.account;
-            if (isValidAddress(acc)) {
-                balanceOf(acc).then((balance) => {
-                    console.log("Balance of " + shortAddress(acc) + " = " + balance);
-                    if (balance < 3) {
-                        giveToken(app.state.account, [1, 2, 3]);
-                    }
-                });
-
-                let tokenID = 3;
-                getStats(tokenID).then((stats) => {
-                    console.log("TokenID: " + tokenID + "\n" +
-                        "\tstamina = " + stats[0] + "\n" +
-                        "\tstrength = " + stats[1] + "\n" +
-                        "\telusive = " + stats[2])
-                }).catch(() => {
-                    console.log("TokenID " + tokenID + " does not exist");
-                })
-
-                // testFunction([acc]);
-                totalSupply().then((supply) => {console.log("Total tokens = " + supply)});
-            }
-        });
+        this.getAccount().then(() => {
+            this.updateState();
+        }).catch(console.log);
     }
 
     getAccount() {
@@ -81,10 +51,47 @@ class App extends React.Component {
         return accounts.then((accounts) => {
             if (isValidAddress(accounts[0])) {
                 app.setState({account: accounts[0]});
-                if (isValidAddress(app.state.account))
-                    console.log("getAccount: " + shortAddress(app.state.account));
             }
         });
+    }
+
+    // todo: UI does not update with new account until refreshed
+    updateState() {
+        let app = this;
+        let acc = app.state.account;
+
+        if (isValidAddress(acc)) {
+            balanceOf(acc).then((balance) => {
+                // update balance
+                console.log("Balance of " + shortAddress(acc) + " = " + balance);
+                app.setState({balance: balance});
+                if (balance < 1) {
+                    giveToken(app.state.account, [1, 2, 3]);
+                }
+            }).then(() => {
+                // update tokens
+                tokensOfOwner(acc).then((tokens) => {
+                    let _tokens = [];
+                    tokens.map((tokenID) => {
+                        getStats(tokenID).then((_stats) => {
+                            _tokens.push({
+                                id: tokenID,
+                                name: "Token " + tokenID,
+                                stats: {
+                                    stamina: _stats[0],
+                                    strength: _stats[1],
+                                    elusive: _stats[2],
+                                },
+                            });
+                        }).then(() => {
+                            app.setState({tokens: _tokens});
+                        });
+                    });
+                });
+            });
+
+            totalSupply().then((supply) => {console.log("Total tokens = " + supply)});
+        }
     }
 
     tabClicked(tab) {
@@ -98,7 +105,7 @@ class App extends React.Component {
             <div>
                 <Menu switchTab={this.tabClicked} />
                 {this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView account={app.state.account} /> : null}
+                    <LibraryView account={app.state.account} tokens={app.state.tokens} /> : null}
                 {this.state.tab === CURRENT_INTERFACE.MARKET ?
                     <MarketView /> : null}
                 {this.state.tab === CURRENT_INTERFACE.TRAINING ?
