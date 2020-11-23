@@ -1,6 +1,8 @@
-const PlayerToken = atrifacts.require("./PlayerToken.sol");
+const PlayerToken = artifacts.require('PlayerToken');
+const ERC721 = artifacts.require('ERC721');
 
 module.exports = function(deployer, network, accounts) {
-    //could be an issue with accounts[0]
-    deployer.deploy(PlayerToken, accounts[0])
+    deployer.deploy(PlayerToken, accounts[0], {from: accounts[0], gas: 5000000});
 };
+
+
