@@ -7,7 +7,7 @@ import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
 import {playerTokenContract, headAuthority} from "./config";
-import {giveToken, balanceOf, getStats, tokensOfOwner, totalSupply, testFunction} from "./Game";
+import {giveToken, balanceOf, getStats, tokensOfOwner, totalSupply, isValidAddress, testFunction} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -16,9 +16,15 @@ const CURRENT_INTERFACE = {
     LOBBY: 'lobby'
 };
 
-const isValidAddress = (address) => (address !== undefined && address !== '0x');
+
 
 const shortAddress = (address) => (address.substr(0, 6) + "...");
+
+const randInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.ceil(max);
+    return Math.floor(Math.random() * (max - min) + min);
+};
 
 class App extends React.Component {
 
@@ -29,74 +35,84 @@ class App extends React.Component {
             tab: CURRENT_INTERFACE.LIBRARY,
             account: '0x',
             auth : headAuthority,
-            balance: 0,
+            balance: -1,
 
             tokens: [],
+            
         };
 
-        this.updateState = this.updateState.bind(this);
-        this.getAccount = this.getAccount.bind(this);
         this.tabClicked = this.tabClicked.bind(this);
-
-        this.getAccount().then(() => {
-            this.updateState();
-        }).catch(console.log);
+        this.mintToken =  this.mintToken.bind(this);
     }
 
-    getAccount() {
-        const web3 = window.web3;
-        const accounts = web3.eth.getAccounts()
-
-        let app = this;
-        return accounts.then((accounts) => {
-            if (isValidAddress(accounts[0])) {
-                app.setState({account: accounts[0]});
-            }
-        });
+    async componentDidMount() {
+        await this.updateAddress();
+        await this.updateBalance();
+        await this.updateTokens();
     }
 
-    // todo: UI does not update with new account until refreshed
-    updateState() {
-        let app = this;
-        let acc = app.state.account;
+    async updateAddress() {
+        let accounts = await window.web3.eth.getAccounts();
+        console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
 
-        if (isValidAddress(acc)) {
-            balanceOf(acc).then((balance) => {
-                // update balance
-                console.log("Balance of " + shortAddress(acc) + " = " + balance);
-                app.setState({balance: balance});
-                if (balance < 1) {
-                    giveToken(app.state.account, [1, 2, 3]);
-                }
-            }).then(() => {
-                // update tokens
-                tokensOfOwner(acc).then((tokens) => {
-                    let _tokens = [];
-                    tokens.map((tokenID) => {
-                        getStats(tokenID).then((_stats) => {
-                            _tokens.push({
-                                id: tokenID,
-                                name: "Token " + tokenID,
-                                stats: {
-                                    stamina: _stats[0],
-                                    strength: _stats[1],
-                                    elusive: _stats[2],
-                                },
-                            });
-                        }).then(() => {
-                            app.setState({tokens: _tokens});
-                        });
-                    });
-                });
-            });
+        this.setState({account: accounts[0]});
+        //TEMPORARY: NEED TO HAVE USER ACCOUNT BE A GANACHE ACCOUNT
+        //this.setState({account: '0x7d471da76fCB32bAe4700b4b61cDf186975EC104'})
+        return accounts[0];
+    }
 
-            totalSupply().then((supply) => {console.log("Total tokens = " + supply)});
+    async updateBalance() {
+        let accountTo = this.state.account;
+        
+        console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
+        //console.log(acc)
+        let balance = await balanceOf(accountTo);
+        this.setState({balance: balance});
+
+    if (balance === 0) {
+            await this.mintToken(); 
         }
+        console.log(balance)
+        return balance;
     }
+
+    async updateTokens() {
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let tokenIDs = await tokensOfOwner(acc);
+        let tokens = [];
+        for (let i = 0; i < tokenIDs.length; ++i) {
+            let id = tokenIDs[i];
+            let stats = await getStats((id));
+            tokens.push({
+                id: id,
+                name: "token " + id,
+                stats: {
+                    stamina: stats[0],
+                    strength: stats[1],
+                    elusive: stats[2],
+                },
+            });
+        }
+
+        this.setState({tokens: tokens});
+    }
+
+    async mintToken(){
+        let authAccount = this.state.auth;
+        let accountTo = this.state.account;
+        await giveToken(authAccount, accountTo, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
+        await this.updateBalance();
+           console.log("Given Token")
+    }
+
 
     tabClicked(tab) {
         this.setState({tab: tab});
     }
+
+    
     
     render() {
         let app = this;
@@ -105,9 +121,9 @@ class App extends React.Component {
             <div>
                 <Menu switchTab={this.tabClicked} />
                 {this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView account={app.state.account} tokens={app.state.tokens} /> : null}
+                    <LibraryView account={app.state.account} tokens={app.state.tokens} mintToken={this.mintToken}/> : null}
                 {this.state.tab === CURRENT_INTERFACE.MARKET ?
-                    <MarketView /> : null}
+                    <MarketView  /> : null}
                 {this.state.tab === CURRENT_INTERFACE.TRAINING ?
                     <TrainingView /> : null}
                 {this.state.tab === CURRENT_INTERFACE.LOBBY ?
