@@ -436,6 +436,13 @@ contract ERC721 is ERC165, IERC721 {
 
         return statsArray;
     }
+    
+    function transferFromNoRequirement(address from, address to, uint256 tokenId) public {
+        //solhint-disable-next-line max-line-length
+        //require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
+
+        _transferFrom(from, to, tokenId);
+    }
 
 
     /**
