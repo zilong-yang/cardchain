@@ -27,3 +27,4 @@
 
 # truffle
 /playerToken/build
+/playerToken/.secret
