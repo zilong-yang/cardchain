@@ -4,8 +4,6 @@ import './stylesheets/Library.css';
 import {addListing, getListingData, getCurrentListingIds, purchaseToken, isValidAddress} from "./Game";
 
 
-
-
 const shortAddress = (address) => (address.substr(0, 6) + "...");
 
 
@@ -23,16 +21,12 @@ export default class MarketView extends React.Component {
     }
 
     //Purchase token, handle failure? Update listings if success
-    buyToken(event){    
-        //this.handleTokenPurchase(id);
-        let listingId = event.target.listingId;
-        let amount = event.target.amount;
-        //this.handleTokenPurchase(listingId, amount);
-        console.log(event.target);
+    buyToken(id) {
+        console.log(id);
     }
 
-     //NEED TO CHANGE FOR TEST NETWORK , SENDING AMOUNT MUST BE THE THE SAME AS THE VALUE
-    async handleTokenPurchase(listingId, amount){
+    //NEED TO CHANGE FOR TEST NETWORK , SENDING AMOUNT MUST BE THE THE SAME AS THE VALUE
+    async handleTokenPurchase(listingId, amount) {
         await purchaseToken(listingId).then();
     }
 
@@ -49,76 +43,70 @@ export default class MarketView extends React.Component {
         return accounts[0];
     }
 
-     //NEED TO HANDLE ERROR WHEN getListingData throws error for calling a inactive listing id.
+    //NEED TO HANDLE ERROR WHEN getListingData throws error for calling a inactive listing id.
     //Get listing ids, for each, call getListingData. Store to state
     //This might be able to be moved to marketplace component. Get Listing data is authorized. 
-    async updateListings(){
+    async updateListings() {
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
         let listingIds = await getCurrentListingIds();
         let listings = [];
-        for(let i = 0; i < listingIds.length; ++i){
+        for (let i = 0; i < listingIds.length; ++i) {
             let id = listingIds[i];
             let listData = await getListingData(id);
-            
-            
-            if(listData != null){
-            listings.push({
-               id: listData[0],
-               tokenId:  listData[1],
-               price : listData[2],
-               stats: {
-                stamina: listData[3],
-                strength: listData[4],
-                elusive: listData[5],
-            },
-            }); 
-        }
+
+
+            console.log(listData);
+            if (listData != null && !listData[3]) {
+                listings.push({
+                    id: listData[0],
+                    tokenId: listData[2],
+                    price: listData[1],
+                    stats: {
+                        stamina: listData[4],
+                        strength: listData[5],
+                        elusive: listData[6],
+                    },
+                });
+            }
         }
 
-        this.setState({listings : listings});
+        this.setState({listings: listings});
     }
 
 
     render() {
         let listings = this.state.listings.map((listing, i) => {
-            return(
+            return (
                 <tr key={i}>
                     <th>{listing.id}</th>
                     <th>[{listing.stats['stamina']}, {listing.stats['strength']}, {listing.stats['elusive']}]</th>
                     <th>{listing.tokenId}</th>
                     <th>{listing.price}</th>
                     <th>
-                        <input type="button" value="Buy" listingid = {listing.id} amount = {listing.price} onClick={this.buyToken}/>
+                        <input type="button" value="Buy" onClick={this.buyToken.bind(this, listing.id)}/>
                     </th>
-                   
-                    
                 </tr>
             )
         });
 
 
-
-
-
-
-
         return (
             <div>
                 <div className="library-table-div">
-                <table id="library-table">
+                    <table id="library-table">
                         <thead>
-                            <tr>
-                                <th>Lisitng Id</th>
-                                <th>Stats</th>
-                                <th>Token Id</th>
-                                <th>Price (In Wei)</th>
-                                <th>Purchase</th>
-                            </tr>
+                        <tr>
+                            <th>Listing Id</th>
+                            <th>Stats</th>
+                            <th>Token Id</th>
+                            <th>Price (In Wei)</th>
+                            <th>Purchase</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {listings}
+                        {listings}
                         </tbody>
                     </table>
                 </div>

@@ -32,7 +32,7 @@ export const purchaseToken = async (listingId) => (await playerMethods.purchaseT
 export const isValidAddress = (address) => (address !== undefined && address !== '0x');
 
 export const giveToken = async (from, to, stats) => {
-    let txCount = await window.web3.eth.getTransactionCount(to);
+    let txCount = await window.web3.eth.getTransactionCount(from);
     const txObject = {
         nonce: window.web3.utils.toHex(txCount),
         gasLimit: window.web3.utils.toHex(1500000),
