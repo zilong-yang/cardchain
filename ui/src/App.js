@@ -7,7 +7,7 @@ import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
 import {playerTokenContract, headAuthority} from "./config";
-import {giveToken, balanceOf, getStats, tokensOfOwner, totalSupply, isValidAddress, testFunction} from "./Game";
+import {balanceOf, getStats, tokensOfOwner, totalSupply, isValidAddress, giveToken} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -68,10 +68,10 @@ class App extends React.Component {
         let balance = await balanceOf(accountTo);
         this.setState({balance: balance});
 
-    if (balance === 0) {
+        console.log("balance = " + balance)
+        if (balance === 0) {
             await this.mintToken(); 
         }
-        console.log(balance)
         return balance;
     }
 
@@ -79,6 +79,7 @@ class App extends React.Component {
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
+        console.log(acc);
         let tokenIDs = await tokensOfOwner(acc);
         let tokens = [];
         for (let i = 0; i < tokenIDs.length; ++i) {
@@ -103,7 +104,8 @@ class App extends React.Component {
         let accountTo = this.state.account;
         await giveToken(authAccount, accountTo, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
         await this.updateBalance();
-           console.log("Given Token")
+        await this.updateTokens();
+        console.log("Given Token")
     }
 
 

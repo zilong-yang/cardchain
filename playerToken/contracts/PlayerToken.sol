@@ -115,7 +115,7 @@ contract PlayerToken is ERC721Full {
     modifier authorize{
         require(
             isAuthorized(msg.sender),
-            "Only a authorized account can call this function"
+            "Only an authorized account can call this function"
         );
         _;
     }
@@ -169,67 +169,67 @@ contract PlayerToken is ERC721Full {
     }
     
     //Call when listing wants to be added to the marketplace
-    function addListing(address payable lister, uint256 tokenId, uint amount) public authorize {
-         require(lister != address(0), "Account Error: Attempted to create listing for invalid account");
-         require(ownerOf(tokenId) == lister, "Lister must own Token");
-         require(!tokensForSale[tokenId], "Token must not already be listed.");
-
-        
-         
-         tokensForSale[tokenId] = true;
-         
-        
-        tokensListed.add(tokenId);
-        //keep track of token's position in tokensListed for removal. 
-        uint256 tokenIndex = tokensListed.length() - 1;
-        
-         Listing storage tempListing = (amount, lister, tokenId, tokenIndex);
-         
-        tokenListing[tokenId] = tempListing;
-         
-    }
+//    function addListing(address payable lister, uint256 tokenId, uint amount) public authorize {
+//         require(lister != address(0), "Account Error: Attempted to create listing for invalid account");
+//         require(ownerOf(tokenId) == lister, "Lister must own Token");
+//         require(!tokensForSale[tokenId], "Token must not already be listed.");
+//
+//
+//
+//         tokensForSale[tokenId] = true;
+//
+//
+//        tokensListed.add(tokenId);
+//        //keep track of token's position in tokensListed for removal.
+//        uint256 tokenIndex = tokensListed.length() - 1;
+//
+//         Listing storage tempListing = (amount, lister, tokenId, tokenIndex);
+//
+//        tokenListing[tokenId] = tempListing;
+//
+//    }
 
     //
-    function purchaseToken(address buyer, uint256 tokenId)public payable{
-    
-        require(tokensForSale[tokenId], "Token must already be listed.");
-        
-        Listing storage currentListing = tokenListing[tokenId];
-        require(currentListing.price == msg.value, "Must pay the full listing amount");
-        require(currentListing.lister != buyer, "Lister cannot buy own listing");
-        
-        //transferToken to buyer;
-        safeTransferFrom(currentListing.lister, buyer, tokenId);
-        
-        //remove token From sale
-        tokensForSale[tokenId] = false;
-        
-        //remove listing from  tokensListed, delete, move last element to gap, change movedListings index
-        uint256 index = currentListing.tokenIndex;
-        
-        delete tokensListed(index);
-        uint256 tokenMovedFromEnd = tokensListed.pop();
-        tokensListed[index] = tokenMovedFromEnd;
-        Listing memory listingMovedFromEnd = tokenListing[tokenMovedFromEnd];
-        listingMovedFromEnd.tokenIndex = index;
-        
-        
-        //pay out the price of the sale to the lister
-        currentListing.lister.transfer(currentListing.amount);
-        
-        
-    }
-    
-    
-    //Retrieves listing information for given tokenId
-    function getListing(uint256 tokenId) public view returns (Listing memory){
-        require(tokensForSale[tokenId], "Token must already be listed.");
-        
-        return(tokenListing[tokenId]);
-    }
-    //Retrieves all tokens listed
-    function getTokensListed() public view authorize returns (uint256[] memory){
-        return(tokensListed);
-    }
+//    function purchaseToken(address buyer, uint256 tokenId)public payable{
+//
+//        require(tokensForSale[tokenId], "Token must already be listed.");
+//
+//        Listing storage currentListing = tokenListing[tokenId];
+//        require(currentListing.price == msg.value, "Must pay the full listing amount");
+//        require(currentListing.lister != buyer, "Lister cannot buy own listing");
+//
+//        //transferToken to buyer;
+//        safeTransferFrom(currentListing.lister, buyer, tokenId);
+//
+//        //remove token From sale
+//        tokensForSale[tokenId] = false;
+//
+//        //remove listing from  tokensListed, delete, move last element to gap, change movedListings index
+//        uint256 index = currentListing.tokenIndex;
+//
+//        delete tokensListed(index);
+//        uint256 tokenMovedFromEnd = tokensListed.pop();
+//        tokensListed[index] = tokenMovedFromEnd;
+//        Listing memory listingMovedFromEnd = tokenListing[tokenMovedFromEnd];
+//        listingMovedFromEnd.tokenIndex = index;
+//
+//
+//        //pay out the price of the sale to the lister
+//        currentListing.lister.transfer(currentListing.amount);
+//
+//
+//    }
+//
+//
+//    //Retrieves listing information for given tokenId
+//    function getListing(uint256 tokenId) public view returns (Listing memory){
+//        require(tokensForSale[tokenId], "Token must already be listed.");
+//
+//        return(tokenListing[tokenId]);
+//    }
+//    //Retrieves all tokens listed
+//    function getTokensListed() public view authorize returns (uint256[] memory){
+//        return(tokensListed);
+//    }
 
 }

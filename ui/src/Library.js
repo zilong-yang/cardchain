@@ -43,7 +43,7 @@ export class LibraryView extends React.Component {
 
     buttonMint(event) {
         this.props.mintToken();
-        console.log("HElp me");
+        // console.log("HElp me");
     }
     
 
@@ -77,20 +77,20 @@ export class LibraryView extends React.Component {
                             {tokens}
                         </tbody>
                     </table>
-                    <br></br>
-                        <form id="ListToken" onSubmit={this.handleSubmit}>
-                        <label id="tokenId"> Token Id: </label>
-                            
-                        <input type="text" id="tokenId" required onChange={this.setListingId}/><br></br>
-                        <label id="listPrice"> List Price(In Wei): </label>
-                        <input type="text" id="listPrice"  required onChange={this.setListingPrice}/><br></br>
-                        <input type="submit" value="List Token on Market" />   
-                        </form>
-                        
-                        <form>
-                        
-                        <input type="button"  value = "Mint Token" onClick = {this.buttonMint}/>  
-                        </form>  
+                    <br/>
+                    <form id="ListToken" onSubmit={this.handleSubmit}>
+                    <label id="tokenId"> Token Id: </label>
+
+                    <input type="text" id="tokenId" required onChange={this.setListingId}/><br/>
+                    <label id="listPrice"> List Price(In Wei): </label>
+                    <input type="text" id="listPrice"  required onChange={this.setListingPrice}/><br/>
+                    <input type="submit" value="List Token on Market" />
+                    </form>
+
+                    <form>
+
+                    <input type="button"  value = "Mint Token" onClick = {this.buttonMint}/>
+                    </form>
                         
                 </div>
             </div>
