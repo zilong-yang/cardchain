@@ -2,7 +2,6 @@ import React from 'react';
 import './stylesheets/Placeholder.css';
 import './stylesheets/Library.css';
 import {addListing} from "./Game.js";
-// const web3 = window.web3;
 
 export class LibraryView extends React.Component {
 
@@ -10,9 +9,8 @@ export class LibraryView extends React.Component {
         super(props);
 
         this.state = {
-            newTokenListingPrice: -1,
-            newTokenListingId: -1,
-
+            listingPrice: -1,
+            listingId: -1,
         };
 
         this.render = this.render.bind(this);
@@ -23,27 +21,25 @@ export class LibraryView extends React.Component {
         this.buttonMint = this.buttonMint.bind(this);
     }
 
-    handleSubmit(event) {
+    async handleSubmit(event) {
         event.preventDefault();
-        this.handleTokenToMarket(this.state.newTokenListingId, this.state.newTokenListingPrice);
+        await this.handleTokenToMarket(this.state.listingId, this.state.newTokenListingPrice);
     }
-    //NEED TO CHANGE FOR TEST NETWORK
-    handleTokenToMarket(tokenId,  tokenPrice) {
-        addListing(tokenId, tokenPrice, this.props.account).then()
+
+    async handleTokenToMarket(tokenId,  tokenPrice) {
+        await addListing(this.props.account, tokenId, tokenPrice);
     }
-  
 
     setListingPrice(event) {
         this.setState({newTokenListingPrice: event.target.value});
       }
 
     setListingId(event) {
-        this.setState({newTokenListingId: event.target.value});
+        this.setState({listingId: event.target.value});
     }
 
     buttonMint(event) {
         this.props.mintToken();
-        // console.log("HElp me");
     }
     
 
@@ -97,6 +93,3 @@ export class LibraryView extends React.Component {
         );
     }
 }
-//ISSUES:
-//Pressing the mint token button currently does not update the tokens, only when page is refreshed. I believe this has to do with the update method being called from 
-//Sub prop, so the sub prop(library) isnt reloading/reciveing the most up to date 

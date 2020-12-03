@@ -2,10 +2,7 @@ import React from 'react';
 import './stylesheets/Placeholder.css'
 import './stylesheets/Library.css';
 import {addListing, getListingData, getCurrentListingIds, purchaseToken, isValidAddress} from "./Game";
-
-
-const shortAddress = (address) => (address.substr(0, 6) + "...");
-
+import {playerTokenContract} from "./config";
 
 export default class MarketView extends React.Component {
     constructor(props) {
@@ -26,8 +23,8 @@ export default class MarketView extends React.Component {
     }
 
     //NEED TO CHANGE FOR TEST NETWORK , SENDING AMOUNT MUST BE THE THE SAME AS THE VALUE
-    async handleTokenPurchase(listingId, amount) {
-        await purchaseToken(listingId).then();
+    async handleTokenPurchase(listingId, price) {
+        await purchaseToken(this.state.account, listingId, price);
     }
 
     async componentDidMount() {
@@ -55,9 +52,10 @@ export default class MarketView extends React.Component {
         for (let i = 0; i < listingIds.length; ++i) {
             let id = listingIds[i];
             let listData = await getListingData(id);
+            // let lister = await playerTokenContract.methods.getLister(id).call();
+            // console.log(lister);
 
-
-            console.log(listData);
+            // if list data is not null and not sold, add to the rendering list
             if (listData != null && !listData[3]) {
                 listings.push({
                     id: listData[0],
@@ -85,7 +83,7 @@ export default class MarketView extends React.Component {
                     <th>{listing.tokenId}</th>
                     <th>{listing.price}</th>
                     <th>
-                        <input type="button" value="Buy" onClick={this.buyToken.bind(this, listing.id)}/>
+                        <input type="button" value="Buy" onClick={this.handleTokenPurchase.bind(this, listing.id, listing.price)}/>
                     </th>
                 </tr>
             )

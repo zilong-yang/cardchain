@@ -23,9 +23,11 @@ contract PlayerToken is ERC721Full {
 
     //listingId => listing Struct
     mapping(uint256 => Listing) listings;
+
     //ListingId => isListed
     mapping(uint256 => bool) currentListings;
-    //array of lisitng's ids. Has removed listing Ids too. 
+
+    //array of listing's ids. Has removed listing Ids too.
     uint256[] private listingIds;
 
     uint256 private listingIdCounter;
@@ -45,7 +47,7 @@ contract PlayerToken is ERC721Full {
 
         listedTokens[tokenId] = true;
 
-        //Increment and set unique listing id (There is a better way to do this with enumeruable interface I believe) 
+        //Increment and set unique listing id (There is a better way to do this with enumerable interface I believe)
         listingIdCounter = listingIdCounter + 1;
         uint256 id = listingIdCounter;
 
@@ -55,8 +57,8 @@ contract PlayerToken is ERC721Full {
 
         listings[id] = newListing;
 
-        //set contract to authrized account for given token 
-        //This is so contract can authrize transfer of token. 
+        //set contract to authorized account for given token
+        //This is so contract can authorize transfer of token.
         setApprovalForAll(address(this), true);
 
     }
@@ -66,24 +68,24 @@ contract PlayerToken is ERC721Full {
     //returns integer array of structure (listingId, tokenId, price, (stats))
     //stats are in same order as with previous implementations
     function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
-//        require(currentListings[listingId], "Listing is not currently active");
+        //        require(currentListings[listingId], "Listing is not currently active");
         Listing storage listing = listings[listingId];
-//        uint[] memory returnList = new uint[](6);
-//        returnList[0] = tempListing.id;
-//        returnList[1] = tempListing.tokenId;
-//        returnList[2] = tempListing.price;
+        //        uint[] memory returnList = new uint[](6);
+        //        returnList[0] = tempListing.id;
+        //        returnList[1] = tempListing.tokenId;
+        //        returnList[2] = tempListing.price;
         uint8[] memory stats = _getStats(listing.tokenId);
-//        returnList[3] = stats[0];
-//        returnList[4] = stats[1];
-//        returnList[5] = stats[2];
+        //        returnList[3] = stats[0];
+        //        returnList[4] = stats[1];
+        //        returnList[5] = stats[2];
 
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
 
     }
 
-    //reutns list of current Listing Ids
-    //This is inefficent. It returns the whole history of listings, both active and inactive. In the DApp, it relies on getListingData to throw and error when it detects the listing is not active. 
-    //
+    // returns list of current Listing Ids
+    // This is inefficient. It returns the whole history of listings, both active and inactive. In the DApp, it
+    // relies on getListingData to throw and error when it detects the listing is not active.
     function getCurrentListingIds() public view authorize returns (uint256[] memory){
         return listingIds;
     }
@@ -105,6 +107,7 @@ contract PlayerToken is ERC721Full {
         listedTokens[listing.tokenId] = false;
         currentListings[listingId] = false;
         listing.sold = true;
+        listingIdCounter--;
     }
 
     modifier authorize{
@@ -160,69 +163,5 @@ contract PlayerToken is ERC721Full {
         authorizedAccounts[_account] = true;
 
     }
-
-    //Call when listing wants to be added to the marketplace
-    //    function addListing(address payable lister, uint256 tokenId, uint amount) public authorize {
-    //         require(lister != address(0), "Account Error: Attempted to create listing for invalid account");
-    //         require(ownerOf(tokenId) == lister, "Lister must own Token");
-    //         require(!tokensForSale[tokenId], "Token must not already be listed.");
-    //
-    //
-    //
-    //         tokensForSale[tokenId] = true;
-    //
-    //
-    //        tokensListed.add(tokenId);
-    //        //keep track of token's position in tokensListed for removal.
-    //        uint256 tokenIndex = tokensListed.length() - 1;
-    //
-    //         Listing storage tempListing = (amount, lister, tokenId, tokenIndex);
-    //
-    //        tokenListing[tokenId] = tempListing;
-    //
-    //    }
-
-    //
-    //    function purchaseToken(address buyer, uint256 tokenId)public payable{
-    //
-    //        require(tokensForSale[tokenId], "Token must already be listed.");
-    //
-    //        Listing storage currentListing = tokenListing[tokenId];
-    //        require(currentListing.price == msg.value, "Must pay the full listing amount");
-    //        require(currentListing.lister != buyer, "Lister cannot buy own listing");
-    //
-    //        //transferToken to buyer;
-    //        safeTransferFrom(currentListing.lister, buyer, tokenId);
-    //
-    //        //remove token From sale
-    //        tokensForSale[tokenId] = false;
-    //
-    //        //remove listing from  tokensListed, delete, move last element to gap, change movedListings index
-    //        uint256 index = currentListing.tokenIndex;
-    //
-    //        delete tokensListed(index);
-    //        uint256 tokenMovedFromEnd = tokensListed.pop();
-    //        tokensListed[index] = tokenMovedFromEnd;
-    //        Listing memory listingMovedFromEnd = tokenListing[tokenMovedFromEnd];
-    //        listingMovedFromEnd.tokenIndex = index;
-    //
-    //
-    //        //pay out the price of the sale to the lister
-    //        currentListing.lister.transfer(currentListing.amount);
-    //
-    //
-    //    }
-    //
-    //
-    //    //Retrieves listing information for given tokenId
-    //    function getListing(uint256 tokenId) public view returns (Listing memory){
-    //        require(tokensForSale[tokenId], "Token must already be listed.");
-    //
-    //        return(tokenListing[tokenId]);
-    //    }
-    //    //Retrieves all tokens listed
-    //    function getTokensListed() public view authorize returns (uint256[] memory){
-    //        return(tokensListed);
-    //    }
 
 }
