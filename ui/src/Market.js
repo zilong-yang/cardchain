@@ -1,17 +1,15 @@
 import React from 'react';
 import './stylesheets/Placeholder.css'
 import './stylesheets/Library.css';
-import {addListing, getListingData, getCurrentListingIds, purchaseToken, isValidAddress} from "./Game";
-import {playerTokenContract} from "./config";
+import {purchaseToken} from "./Game";
 
 export default class MarketView extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            account: '0x',
-            listings: []
-
+            account: this.props.account,
+            listings: this.props.listings,
         };
 
         this.buyToken = this.buyToken.bind(this);
@@ -25,70 +23,27 @@ export default class MarketView extends React.Component {
     //NEED TO CHANGE FOR TEST NETWORK , SENDING AMOUNT MUST BE THE THE SAME AS THE VALUE
     async handleTokenPurchase(listingId, price) {
         await purchaseToken(this.state.account, listingId, price);
+
+        // TODO: update UI after purchase
     }
-
-    async componentDidMount() {
-        await this.updateAddress();
-        await this.updateListings();
-    }
-
-    async updateAddress() {
-        let accounts = await window.web3.eth.getAccounts();
-        console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
-
-        this.setState({account: accounts[0]});
-        return accounts[0];
-    }
-
-    //NEED TO HANDLE ERROR WHEN getListingData throws error for calling a inactive listing id.
-    //Get listing ids, for each, call getListingData. Store to state
-    //This might be able to be moved to marketplace component. Get Listing data is authorized. 
-    async updateListings() {
-        let acc = this.state.account;
-        console.assert(isValidAddress(acc), "Invalid account: " + acc);
-
-        let listingIds = await getCurrentListingIds();
-        let listings = [];
-        for (let i = 0; i < listingIds.length; ++i) {
-            let id = listingIds[i];
-            let listData = await getListingData(id);
-            // let lister = await playerTokenContract.methods.getLister(id).call();
-            // console.log(lister);
-
-            // if list data is not null and not sold, add to the rendering list
-            if (listData != null && !listData[3]) {
-                listings.push({
-                    id: listData[0],
-                    tokenId: listData[2],
-                    price: listData[1],
-                    stats: {
-                        stamina: listData[4],
-                        strength: listData[5],
-                        elusive: listData[6],
-                    },
-                });
-            }
-        }
-
-        this.setState({listings: listings});
-    }
-
 
     render() {
         let listings = this.state.listings.map((listing, i) => {
+            // TODO: disable Buy button for those that are listed by current user
             return (
                 <tr key={i}>
                     <th>{listing.id}</th>
-                    <th>[{listing.stats['stamina']}, {listing.stats['strength']}, {listing.stats['elusive']}]</th>
-                    <th>{listing.tokenId}</th>
+                    <th>{listing.stats['stamina']}</th>
+                    <th>{listing.stats['strength']}</th>
+                    <th>{listing.stats['elusive']}</th>
                     <th>{listing.price}</th>
                     <th>
-                        <input type="button" value="Buy" onClick={this.handleTokenPurchase.bind(this, listing.id, listing.price)}/>
+                        <input type="button" value="Buy"
+                               onClick={this.handleTokenPurchase.bind(this, listing.id, listing.price)}/>
                     </th>
                 </tr>
             )
         });
-
 
         return (
             <div>
@@ -97,8 +52,9 @@ export default class MarketView extends React.Component {
                         <thead>
                         <tr>
                             <th>Listing Id</th>
-                            <th>Stats</th>
-                            <th>Token Id</th>
+                            <th>Stamina</th>
+                            <th>Strength</th>
+                            <th>Elusive</th>
                             <th>Price (In Wei)</th>
                             <th>Purchase</th>
                         </tr>

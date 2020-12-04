@@ -7,7 +7,15 @@ import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
 import {playerTokenContract, headAuthority} from "./config";
-import {balanceOf, getStats, tokensOfOwner, totalSupply, isValidAddress, giveToken} from "./Game";
+import {
+    balanceOf,
+    getStats,
+    tokensOfOwner,
+    totalSupply,
+    isValidAddress,
+    giveToken,
+    getCurrentListingIds, getListingData
+} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -15,8 +23,6 @@ const CURRENT_INTERFACE = {
     TRAINING: 'training',
     LOBBY: 'lobby'
 };
-
-
 
 const shortAddress = (address) => (address.substr(0, 6) + "...");
 
@@ -37,17 +43,19 @@ class App extends React.Component {
             balance: -1,
 
             tokens: [],
-            
+            listings: [],
         };
 
         this.tabClicked = this.tabClicked.bind(this);
         this.mintToken =  this.mintToken.bind(this);
+        this.updateListings = this.updateListings.bind(this);
     }
 
     async componentDidMount() {
         await this.updateAddress();
         await this.updateBalance();
         await this.updateTokens();
+        await this.updateListings();
     }
 
     async updateAddress() {
@@ -79,7 +87,6 @@ class App extends React.Component {
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
-        console.log(acc);
         let tokenIDs = await tokensOfOwner(acc);
         let tokens = [];
         for (let i = 0; i < tokenIDs.length; ++i) {
@@ -108,27 +115,77 @@ class App extends React.Component {
         console.log("Given Token")
     }
 
+    async updateListings() {
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let listingIDs = await getCurrentListingIds();
+        let listings = [];
+        for (let i = 0; i < listingIDs.length; ++i) {
+            let id = listingIDs[i];
+            let data = await getListingData(id);
+
+            if (data != null && !data[3]) {
+                listings.push({
+                    id: data[0],
+                    price: data[1],
+                    tokenId: data[2],
+                    stats: {
+                        stamina: data[4],
+                        strength: data[5],
+                        elusive: data[6],
+                    }
+                });
+            }
+        }
+
+        this.setState({listings: listings});
+    }
 
     tabClicked(tab) {
         this.setState({tab: tab});
     }
 
-    
-    
     render() {
         let app = this;
 
         return (
             <div>
                 <Menu switchTab={this.tabClicked} />
-                {this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView account={app.state.account} tokens={app.state.tokens} mintToken={this.mintToken}/> : null}
-                {this.state.tab === CURRENT_INTERFACE.MARKET ?
-                    <MarketView  /> : null}
-                {this.state.tab === CURRENT_INTERFACE.TRAINING ?
-                    <TrainingView /> : null}
-                {this.state.tab === CURRENT_INTERFACE.LOBBY ?
-                    <LobbyView /> : null}
+                {
+                    this.state.tab === CURRENT_INTERFACE.LIBRARY ?
+                    <LibraryView
+                        account={app.state.account}
+                        tokens={app.state.tokens}
+                        mintToken={this.mintToken}
+                        updateListings={this.updateListings}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.MARKET ?
+                    <MarketView
+                        account={this.state.account}
+                        tokens={this.state.tokens}
+                        listings={this.state.listings}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.TRAINING ?
+                    <TrainingView
+                        tokens={app.state.tokens}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.LOBBY ?
+                    <LobbyView />
+                    : null
+                }
             </div>
         );
     }

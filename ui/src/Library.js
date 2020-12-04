@@ -26,22 +26,22 @@ export class LibraryView extends React.Component {
         await this.handleTokenToMarket(this.state.listingId, this.state.newTokenListingPrice);
     }
 
-    async handleTokenToMarket(tokenId,  tokenPrice) {
+    async handleTokenToMarket(tokenId, tokenPrice) {
         await addListing(this.props.account, tokenId, tokenPrice);
+        await this.props.updateListings();
     }
 
     setListingPrice(event) {
         this.setState({newTokenListingPrice: event.target.value});
-      }
+    }
 
     setListingId(event) {
         this.setState({listingId: event.target.value});
     }
 
-    buttonMint(event) {
+    buttonMint() {
         this.props.mintToken();
     }
-    
 
     render() {
         let tokens = this.props.tokens.map((token, i) => {
