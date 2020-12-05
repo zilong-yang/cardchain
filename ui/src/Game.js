@@ -26,7 +26,7 @@ export const sendSignedTx = async (from, contractMethod, value) => {
 };
 
 export const giveToken = async (from, to, stats) => {
-    await sendSignedTx(from, playerMethods.mint(to, "", stats), 0);
+    await sendSignedTx(from, playerMethods.mint(to, stats), 0);
 };
 
 export const balanceOf = async (address) => (Number(await playerMethods.balanceOf(address).call()));

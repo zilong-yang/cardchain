@@ -123,26 +123,18 @@ contract PlayerToken is ERC721Full {
     }
 
     //create new PlayerTokens
-    function mint(address _to, string memory _tokenURI, uint8[3] memory stats) public authorize returns (bool){
+    function mint(address _to, uint8[3] memory stats) public authorize returns (bool) {
         //id is the number of token (mint number)
         uint256 _tokenId = totalSupply().add(1);
 
-        // new method to mint
-        _mint(_to, _tokenId);
-        changeStats(_tokenId, stats);
-
-        //call ERC721 mint function to mint a new token
-        //        _mintWithStats(_to, _tokenId, stats);
-
-        //set the newly minted token's URI to passed URI
-        _setTokenURI(_tokenId, _tokenURI);
-
+        //call IERC721Enumerable mint function to mint a new token
+        _mintWithStats(_to, _tokenId, stats);
 
         return true;
     }
 
     //Change the stats of a given token, must be authorized account
-    function changeStats(uint256 tokenId, uint8[3] memory stats) public authorize {
+    function changeStats(uint256 tokenId, uint8[3] memory stats) internal authorize {
         //dont really need this unless we do something before calling this
         _changeStats(tokenId, stats);
     }
