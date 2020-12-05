@@ -6,7 +6,7 @@ import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import {playerTokenContract, headAuthority} from "./config";
+import {headAuthority} from "./config";
 import {
     balanceOf,
     getStats,
@@ -14,7 +14,9 @@ import {
     totalSupply,
     isValidAddress,
     giveToken,
-    getCurrentListingIds, getListingData
+    getCurrentListingIds,
+    getListingData,
+    isListed,
 } from "./Game";
 
 const CURRENT_INTERFACE = {
@@ -44,11 +46,11 @@ class App extends React.Component {
 
             tokens: [],
             listings: [],
+            trainable: [],
         };
 
         this.tabClicked = this.tabClicked.bind(this);
         this.mintToken =  this.mintToken.bind(this);
-        this.updateListings = this.updateListings.bind(this);
     }
 
     async componentDidMount() {
@@ -56,6 +58,7 @@ class App extends React.Component {
         await this.updateBalance();
         await this.updateTokens();
         await this.updateListings();
+        await this.updateTrainable();
     }
 
     async updateAddress() {
@@ -63,16 +66,13 @@ class App extends React.Component {
         console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
 
         this.setState({account: accounts[0]});
-        //TEMPORARY: NEED TO HAVE USER ACCOUNT BE A GANACHE ACCOUNT
-        //this.setState({account: '0x7d471da76fCB32bAe4700b4b61cDf186975EC104'})
         return accounts[0];
     }
 
     async updateBalance() {
         let accountTo = this.state.account;
-        
         console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
-        //console.log(acc)
+
         let balance = await balanceOf(accountTo);
         this.setState({balance: balance});
 
@@ -142,6 +142,22 @@ class App extends React.Component {
         this.setState({listings: listings});
     }
 
+    async updateTrainable() {
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let tokens = this.state.tokens;
+        let trainable = []
+        for (let i = 0; i < tokens.length; ++i) {
+            let listed = await isListed(tokens[i].id);
+            if (listed != null && !listed) {
+                trainable.push(tokens[i]);
+            }
+        }
+
+        this.setState({trainable: trainable});
+    }
+
     tabClicked(tab) {
         this.setState({tab: tab});
     }
@@ -155,10 +171,7 @@ class App extends React.Component {
                 {
                     this.state.tab === CURRENT_INTERFACE.LIBRARY ?
                     <LibraryView
-                        account={app.state.account}
-                        tokens={app.state.tokens}
-                        mintToken={this.mintToken}
-                        updateListings={this.updateListings}
+                        app={this}
                     />
                     : null
                 }
@@ -169,6 +182,7 @@ class App extends React.Component {
                         account={this.state.account}
                         tokens={this.state.tokens}
                         listings={this.state.listings}
+                        app={this}
                     />
                     : null
                 }
@@ -176,7 +190,9 @@ class App extends React.Component {
                 {
                     this.state.tab === CURRENT_INTERFACE.TRAINING ?
                     <TrainingView
-                        tokens={app.state.tokens}
+                        account={this.state.account}
+                        trainable={this.state.trainable}
+                        app={this}
                     />
                     : null
                 }

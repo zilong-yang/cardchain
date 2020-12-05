@@ -110,6 +110,10 @@ contract PlayerToken is ERC721Full {
         listingIdCounter--;
     }
 
+    function isListed(uint256 tokenId) public view returns (bool) {
+        return listedTokens[tokenId];
+    }
+
     modifier authorize{
         require(
             isAuthorized(msg.sender),

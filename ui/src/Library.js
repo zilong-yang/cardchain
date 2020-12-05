@@ -27,8 +27,9 @@ export class LibraryView extends React.Component {
     }
 
     async handleTokenToMarket(tokenId, tokenPrice) {
-        await addListing(this.props.account, tokenId, tokenPrice);
-        await this.props.updateListings();
+        await addListing(this.props.app.state.account, tokenId, tokenPrice);
+        await this.props.app.updateListings();
+        await this.props.app.updateTrainable();
     }
 
     setListingPrice(event) {
@@ -40,11 +41,11 @@ export class LibraryView extends React.Component {
     }
 
     buttonMint() {
-        this.props.mintToken();
+        this.props.app.mintToken();
     }
 
     render() {
-        let tokens = this.props.tokens.map((token, i) => {
+        let tokens = this.props.app.state.tokens.map((token, i) => {
             return (
                 <tr key={i}>
                     <th>{token.name}</th>
@@ -58,7 +59,7 @@ export class LibraryView extends React.Component {
 
         return (
             <div>
-                <h1 align="center">Account: {this.props.account}</h1>
+                <h1 align="center">Account: {this.props.app.state.account}</h1>
                 <div id="library-table-div">
                     <table id="library-table">
                         <thead>

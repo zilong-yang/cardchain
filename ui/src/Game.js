@@ -49,4 +49,6 @@ export const purchaseToken = async (from, listingId, price) => {
     await sendSignedTx(from, playerMethods.purchaseToken(listingId), price);
 };
 
+export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
+
 export const isValidAddress = (address) => (address !== undefined && address !== '0x');
