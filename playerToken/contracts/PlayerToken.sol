@@ -15,8 +15,12 @@ contract PlayerToken is ERC721Full {
 
     //head authority, only account that can add authorized accounts
     address private authority;
+
     //only authorized accounts can change token variables
     mapping(address => bool) authorizedAccounts;
+
+    // the last token's ID on the blockchain; should never be decremented
+    uint256 private lastTokenId;
 
     //tokenId => isListed
     mapping(uint256 => bool) listedTokens;
@@ -30,11 +34,13 @@ contract PlayerToken is ERC721Full {
     //array of listing's ids. Has removed listing Ids too.
     uint256[] private listingIds;
 
+    // current number of listings
     uint256 private listingIdCounter;
 
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
         authority = _authority;
         authorizedAccounts[_authority] = true;
+        lastTokenId = 0;
         listingIdCounter = 0;
     }
 
@@ -124,13 +130,18 @@ contract PlayerToken is ERC721Full {
 
     //create new PlayerTokens
     function mint(address _to, uint8[3] memory stats) public authorize returns (uint256) {
-        //id is the number of token (mint number)
-        uint256 _tokenId = totalSupply().add(1);
+        // increment the current ID
+        lastTokenId++;
 
         //call IERC721Enumerable mint function to mint a new token
-        _mintWithStats(_to, _tokenId, stats);
+        _mintWithStats(_to, lastTokenId, stats);
 
-        return _tokenId;
+        return lastTokenId;
+    }
+
+    function burn(uint256 tokenId) public {
+        // call _burn in ERC721Enumerable
+        _burn(msg.sender, tokenId);
     }
 
     //Change the stats of a given token, must be authorized account
@@ -158,14 +169,6 @@ contract PlayerToken is ERC721Full {
         //add account to authorizedAccounts
         authorizedAccounts[_account] = true;
 
-    }
-
-    // Upgrade a token by burning the original token and minting a new token with new stats
-    function upgradeToken(uint256 tokenId, uint8[3] memory newStats) public returns (uint256) {
-        require(!listedTokens[tokenId], "A listed token cannot be upgraded");
-
-        _burn(msg.sender, tokenId);
-        return mint(msg.sender, newStats);
     }
 
 }
