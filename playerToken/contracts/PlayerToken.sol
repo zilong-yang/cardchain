@@ -123,14 +123,14 @@ contract PlayerToken is ERC721Full {
     }
 
     //create new PlayerTokens
-    function mint(address _to, uint8[3] memory stats) public authorize returns (bool) {
+    function mint(address _to, uint8[3] memory stats) public authorize returns (uint256) {
         //id is the number of token (mint number)
         uint256 _tokenId = totalSupply().add(1);
 
         //call IERC721Enumerable mint function to mint a new token
         _mintWithStats(_to, _tokenId, stats);
 
-        return true;
+        return _tokenId;
     }
 
     //Change the stats of a given token, must be authorized account
@@ -158,6 +158,14 @@ contract PlayerToken is ERC721Full {
         //add account to authorizedAccounts
         authorizedAccounts[_account] = true;
 
+    }
+
+    // Upgrade a token by burning the original token and minting a new token with new stats
+    function upgradeToken(uint256 tokenId, uint8[3] memory newStats) public returns (uint256) {
+        require(!listedTokens[tokenId], "A listed token cannot be upgraded");
+
+        _burn(msg.sender, tokenId);
+        return mint(msg.sender, newStats);
     }
 
 }
