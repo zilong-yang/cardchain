@@ -25,9 +25,11 @@ export const sendSignedTx = async (from, contractMethod, value) => {
     return (await window.web3.eth.sendSignedTransaction(raw, console.log)).transactionHash;
 };
 
-export const giveToken = async (from, to, stats) => {
-    await sendSignedTx(from, playerMethods.mint(to, stats), 0);
-};
+export const giveToken = async (account, to, stats) =>
+    (await sendSignedTx(account, playerMethods.mint(to, stats), 0));
+
+export const burnToken = async (owner, tokenId) =>
+    (await sendSignedTx(owner, playerMethods.burn(tokenId), 0))
 
 export const balanceOf = async (address) => (Number(await playerMethods.balanceOf(address).call()));
 
@@ -51,4 +53,15 @@ export const purchaseToken = async (from, listingId, price) => {
 
 export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
 
+export const trainToken = async (from, tokenId, newStats) => {
+    await burnToken(from, tokenId);
+    await giveToken(from, from, newStats)
+}
+
 export const isValidAddress = (address) => (address !== undefined && address !== '0x');
+
+export const randInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.ceil(max);
+    return Math.floor(Math.random() * (max - min) + min);
+};

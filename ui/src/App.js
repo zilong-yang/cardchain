@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Menu } from "./Menu";
-import { LibraryView } from "./Library";
+import {Menu} from "./Menu";
+import {LibraryView} from "./Library";
 import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
@@ -9,14 +9,14 @@ import LobbyView from "./Lobby";
 import {headAuthority} from "./config";
 import {
     balanceOf,
-    getStats,
-    tokensOfOwner,
-    totalSupply,
-    isValidAddress,
-    giveToken,
     getCurrentListingIds,
     getListingData,
+    getStats,
+    giveToken,
     isListed,
+    isValidAddress,
+    randInt,
+    tokensOfOwner,
 } from "./Game";
 
 const CURRENT_INTERFACE = {
@@ -27,12 +27,6 @@ const CURRENT_INTERFACE = {
 };
 
 const shortAddress = (address) => (address.substr(0, 6) + "...");
-
-const randInt = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.ceil(max);
-    return Math.floor(Math.random() * (max - min) + min);
-};
 
 class App extends React.Component {
     constructor(props) {
@@ -50,7 +44,6 @@ class App extends React.Component {
         };
 
         this.tabClicked = this.tabClicked.bind(this);
-        this.mintToken =  this.mintToken.bind(this);
     }
 
     async componentDidMount() {
@@ -96,9 +89,9 @@ class App extends React.Component {
                 id: id,
                 name: "token " + id,
                 stats: {
-                    stamina: stats[0],
-                    strength: stats[1],
-                    elusive: stats[2],
+                    stamina: Number(stats[0]),
+                    strength: Number(stats[1]),
+                    elusive: Number(stats[2]),
                 },
             });
         }
@@ -110,9 +103,10 @@ class App extends React.Component {
         let authAccount = this.state.auth;
         let accountTo = this.state.account;
         await giveToken(authAccount, accountTo, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
+
         await this.updateBalance();
         await this.updateTokens();
-        console.log("Given Token")
+        await this.updateTrainable();
     }
 
     async updateListings() {
@@ -163,8 +157,6 @@ class App extends React.Component {
     }
 
     render() {
-        let app = this;
-
         return (
             <div>
                 <Menu switchTab={this.tabClicked} />
@@ -190,8 +182,6 @@ class App extends React.Component {
                 {
                     this.state.tab === CURRENT_INTERFACE.TRAINING ?
                     <TrainingView
-                        account={this.state.account}
-                        trainable={this.state.trainable}
                         app={this}
                     />
                     : null

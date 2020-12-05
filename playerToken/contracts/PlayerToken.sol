@@ -5,12 +5,11 @@ import "./ERC721Full.sol";
 contract PlayerToken is ERC721Full {
 
     struct Listing {
-        uint256 id;
-        uint price;
-        address payable lister;
-        uint256 tokenId;
-        //uint256 tokenIndex;
-        bool sold;
+        uint256 id; // ID of this listing
+        uint price; // price of this listing
+        address payable lister; // lister's address
+        uint256 tokenId; // ID of the listed token
+        bool sold; // whether this token has already been sold
     }
 
     //head authority, only account that can add authorized accounts
@@ -69,21 +68,13 @@ contract PlayerToken is ERC721Full {
 
     }
 
-
     //Returns given ListingId listing
     //returns integer array of structure (listingId, tokenId, price, (stats))
     //stats are in same order as with previous implementations
     function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
-        //        require(currentListings[listingId], "Listing is not currently active");
+        //require(currentListings[listingId], "Listing is not currently active");
         Listing storage listing = listings[listingId];
-        //        uint[] memory returnList = new uint[](6);
-        //        returnList[0] = tempListing.id;
-        //        returnList[1] = tempListing.tokenId;
-        //        returnList[2] = tempListing.price;
         uint8[] memory stats = _getStats(listing.tokenId);
-        //        returnList[3] = stats[0];
-        //        returnList[4] = stats[1];
-        //        returnList[5] = stats[2];
 
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
 
