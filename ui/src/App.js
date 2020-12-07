@@ -52,42 +52,52 @@ class App extends React.Component {
     }
 
     async componentDidMount() {
+        
         await this.updateAddress();
+        
         await this.updateBalance();
+       
         await this.updateTokens();
+        
         await this.updateListings();
     }
 
     async updateAddress() {
-        let accounts = await window.web3.eth.getAccounts();
+        //let accounts = await window.web3.eth.getAccounts();
+        let accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
         console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
 
         this.setState({account: accounts[0]});
+        
         //TEMPORARY: NEED TO HAVE USER ACCOUNT BE A GANACHE ACCOUNT
         //this.setState({account: '0x7d471da76fCB32bAe4700b4b61cDf186975EC104'})
         return accounts[0];
     }
 
     async updateBalance() {
+        console.log("UpdateBalance");
         let accountTo = this.state.account;
-        
+        console.log(this.state.account);
         console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
-        //console.log(acc)
+        //console.log(this.state.auth);
         let balance = await balanceOf(accountTo);
         this.setState({balance: balance});
 
         console.log("balance = " + balance)
         if (balance === 0) {
-            await this.mintToken(); 
+            this.mintToken();
+            console.log("Test2");
         }
         return balance;
     }
 
     async updateTokens() {
+        console.log("UpdateTokens");
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
         let tokenIDs = await tokensOfOwner(acc);
+        console.log(tokenIDs);
         let tokens = [];
         for (let i = 0; i < tokenIDs.length; ++i) {
             let id = tokenIDs[i];

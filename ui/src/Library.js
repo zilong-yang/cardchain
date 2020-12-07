@@ -27,7 +27,7 @@ export class LibraryView extends React.Component {
     }
 
     async handleTokenToMarket(tokenId, tokenPrice) {
-        await addListing(this.props.account, tokenId, tokenPrice);
+        await addListing(tokenId, tokenPrice);
         await this.props.updateListings();
     }
 
@@ -48,7 +48,9 @@ export class LibraryView extends React.Component {
             return (
                 <tr key={i}>
                     <th>{token.name}</th>
-                    <th>[{token.stats['stamina']}, {token.stats['strength']}, {token.stats['elusive']}]</th>
+                    <th>{token.stats['stamina']}</th>
+                    <th>{token.stats['strength']}</th>
+                    <th>{token.stats['elusive']}</th>
                     <th>{token.id}</th>
                    
                     
@@ -64,7 +66,9 @@ export class LibraryView extends React.Component {
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Stats</th>
+                                <th>Stamina</th>
+                                <th>Strength</th>
+                                <th>Elusive</th>
                                 <th>ID</th>
                              
                             </tr>

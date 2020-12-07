@@ -15,14 +15,13 @@ export default class MarketView extends React.Component {
         this.buyToken = this.buyToken.bind(this);
     }
 
-    //Purchase token, handle failure? Update listings if success
+   
     buyToken(id) {
         console.log(id);
     }
 
-    //NEED TO CHANGE FOR TEST NETWORK , SENDING AMOUNT MUST BE THE THE SAME AS THE VALUE
     async handleTokenPurchase(listingId, price) {
-        await purchaseToken(this.state.account, listingId, price);
+        await purchaseToken(listingId, price);
 
         // TODO: update UI after purchase
     }
