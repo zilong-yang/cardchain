@@ -50,10 +50,13 @@ export const addListing = async (listingId, amount) => {
     };
 
     //returns tx Hash
+    
     return await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
+
+
 };
 
 export const isValidAddress = (address) => (address !== undefined && address !== '0x');

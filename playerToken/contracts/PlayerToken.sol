@@ -30,6 +30,8 @@ contract PlayerToken is ERC721Full {
     //array of listing's ids. Has removed listing Ids too.
     uint256[] private listingIds;
 
+    
+
     uint256 private listingIdCounter;
 
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
@@ -65,27 +67,18 @@ contract PlayerToken is ERC721Full {
 
 
     //Returns given ListingId listing
-    //returns integer array of structure (listingId, tokenId, price, (stats))
-    //stats are in same order as with previous implementations
     function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
-        //        require(currentListings[listingId], "Listing is not currently active");
+        
         Listing storage listing = listings[listingId];
-        //        uint[] memory returnList = new uint[](6);
-        //        returnList[0] = tempListing.id;
-        //        returnList[1] = tempListing.tokenId;
-        //        returnList[2] = tempListing.price;
+        
         uint8[] memory stats = _getStats(listing.tokenId);
-        //        returnList[3] = stats[0];
-        //        returnList[4] = stats[1];
-        //        returnList[5] = stats[2];
+        
 
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
 
     }
 
     // returns list of current Listing Ids
-    // This is inefficient. It returns the whole history of listings, both active and inactive. In the DApp, it
-    // relies on getListingData to throw and error when it detects the listing is not active.
     function getCurrentListingIds() public view authorize returns (uint256[] memory){
         return listingIds;
     }
@@ -96,10 +89,9 @@ contract PlayerToken is ERC721Full {
         Listing storage listing = listings[listingId];
         require(listing.price <= msg.value, "Must pay the full listing amount");
         require(msg.sender != listing.lister, "Lister cannot buy own listing");
-        //require(getApproved(tempListing.tokenId)==address(this), "Contract must  be approved account on Token for Transfer");
+        
 
-        //UNSAFE, Should have all transfer methods in separate contract, then call that from this contract
-        //Needed to change so that it does not check for msg.sender to be the token owner or approved because the buyer is not approved or owner. 
+        
         transferFromNoRequirement(listing.lister, msg.sender, listing.tokenId);
         listing.lister.transfer(listing.price);
 
@@ -107,7 +99,7 @@ contract PlayerToken is ERC721Full {
         listedTokens[listing.tokenId] = false;
         currentListings[listingId] = false;
         listing.sold = true;
-        listingIdCounter--;
+        
     }
 
     modifier authorize{
@@ -126,11 +118,6 @@ contract PlayerToken is ERC721Full {
         // new method to mint
         _mint(_to, _tokenId);
         changeStats(_tokenId, stats);
-
-        //call ERC721 mint function to mint a new token
-        //        _mintWithStats(_to, _tokenId, stats);
-
-        //set the newly minted token's URI to passed URI
         _setTokenURI(_tokenId, _tokenURI);
 
 
