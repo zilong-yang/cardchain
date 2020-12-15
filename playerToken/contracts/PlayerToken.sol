@@ -4,20 +4,108 @@ import "./ERC721Full.sol";
 
 contract PlayerToken is ERC721Full {
 
+    struct Listing {
+        uint256 id;
+        uint price;
+        address payable lister;
+        uint256 tokenId;
+        //uint256 tokenIndex;
+        bool sold;
+    }
+
     //head authority, only account that can add authorized accounts
     address private authority;
     //only authorized accounts can change token variables
     mapping(address => bool) authorizedAccounts;
 
+    //tokenId => isListed
+    mapping(uint256 => bool) listedTokens;
+
+    //listingId => listing Struct
+    mapping(uint256 => Listing) listings;
+
+    //ListingId => isListed
+    mapping(uint256 => bool) currentListings;
+
+    //array of listing's ids. Has removed listing Ids too.
+    uint256[] private listingIds;
+
+    
+
+    uint256 private listingIdCounter;
+
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
         authority = _authority;
         authorizedAccounts[_authority] = true;
+        listingIdCounter = 0;
+    }
+
+    //creates new listing and adds it to list. 
+    function addListing(uint256 tokenId, uint amount) public {
+        require(msg.sender != address(0), "Account Error: Attempted to create listing for invalid account");
+        require(amount > 0, "Amount must be greater than 0");
+        require(ownerOf(tokenId) == msg.sender, "Lister must own Token");
+        require(!listedTokens[tokenId], "Token must not already be listed.");
+
+        listedTokens[tokenId] = true;
+
+        //Increment and set unique listing id (There is a better way to do this with enumerable interface I believe)
+        listingIdCounter = listingIdCounter + 1;
+        uint256 id = listingIdCounter;
+
+        Listing memory newListing = Listing(id, amount, msg.sender, tokenId, false);
+        listingIds.push(id);
+        currentListings[id] = true;
+
+        listings[id] = newListing;
+
+        //set contract to authorized account for given token
+        //This is so contract can authorize transfer of token.
+        setApprovalForAll(address(this), true);
+
+    }
+
+
+    //Returns given ListingId listing
+    function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
+        
+        Listing storage listing = listings[listingId];
+        
+        uint8[] memory stats = _getStats(listing.tokenId);
+        
+
+        return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
+
+    }
+
+    // returns list of current Listing Ids
+    function getCurrentListingIds() public view authorize returns (uint256[] memory){
+        return listingIds;
+    }
+
+    function purchaseToken(uint256 listingId) public payable {
+        require(currentListings[listingId], "Listing must be currently listed");
+
+        Listing storage listing = listings[listingId];
+        require(listing.price <= msg.value, "Must pay the full listing amount");
+        require(msg.sender != listing.lister, "Lister cannot buy own listing");
+        
+
+        
+        transferFromNoRequirement(listing.lister, msg.sender, listing.tokenId);
+        listing.lister.transfer(listing.price);
+
+        //Remove listing from current listings
+        listedTokens[listing.tokenId] = false;
+        currentListings[listingId] = false;
+        listing.sold = true;
+        
     }
 
     modifier authorize{
         require(
             isAuthorized(msg.sender),
-            "Only a authorized account can call this function"
+            "Only an authorized account can call this function"
         );
         _;
     }
@@ -30,12 +118,9 @@ contract PlayerToken is ERC721Full {
         // new method to mint
         _mint(_to, _tokenId);
         changeStats(_tokenId, stats);
-
-        //call ERC721 mint function to mint a new token
-//        _mintWithStats(_to, _tokenId, stats);
-
-        //set the newly minted token's URI to passed URI
         _setTokenURI(_tokenId, _tokenURI);
+
+
         return true;
     }
 

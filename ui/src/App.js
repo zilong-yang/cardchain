@@ -7,7 +7,15 @@ import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
 import {playerTokenContract, headAuthority} from "./config";
-import {giveToken, balanceOf, getStats, tokensOfOwner, totalSupply, testFunction} from "./Game";
+import {
+    balanceOf,
+    getStats,
+    tokensOfOwner,
+    totalSupply,
+    isValidAddress,
+    giveToken,
+    getCurrentListingIds, getListingData
+} from "./Game";
 
 const CURRENT_INTERFACE = {
     LIBRARY: 'library',
@@ -15,8 +23,6 @@ const CURRENT_INTERFACE = {
     TRAINING: 'training',
     LOBBY: 'lobby'
 };
-
-const isValidAddress = (address) => (address !== undefined && address !== '0x');
 
 const shortAddress = (address) => (address.substr(0, 6) + "...");
 
@@ -27,7 +33,6 @@ const randInt = (min, max) => {
 };
 
 class App extends React.Component {
-
     constructor(props) {
         super(props);
 
@@ -38,17 +43,20 @@ class App extends React.Component {
             balance: -1,
 
             tokens: [],
+            listings: [],
         };
 
         this.tabClicked = this.tabClicked.bind(this);
+        this.mintToken =  this.mintToken.bind(this);
+        this.updateListings = this.updateListings.bind(this);
     }
 
     async componentDidMount() {
         await this.updateAddress();
         await this.updateBalance();
         await this.updateTokens();
+        await this.updateListings();
     }
-
     async updateAddress() {
         let accounts = await window.web3.eth.getAccounts();
         console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
@@ -58,6 +66,82 @@ class App extends React.Component {
     }
 
     async updateBalance() {
+        let accountTo = this.state.account;
+        console.log(this.state.account);
+        console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
+        
+        let balance = await balanceOf(accountTo);
+        this.setState({balance: balance});
+
+        console.log("balance = " + balance)
+        if (balance === 0) {
+            this.mintToken();
+          
+        }
+        return balance;
+    }
+
+    async updateTokens() {
+       
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let tokenIDs = await tokensOfOwner(acc);
+        console.log(tokenIDs);
+        let tokens = [];
+        for (let i = 0; i < tokenIDs.length; ++i) {
+            let id = tokenIDs[i];
+            let stats = await getStats((id));
+            tokens.push({
+                id: id,
+                name: "token " + id,
+                stats: {
+                    stamina: stats[0],
+                    strength: stats[1],
+                    elusive: stats[2],
+                },
+            });
+        }
+
+        this.setState({tokens: tokens});
+    }
+
+    async mintToken(){
+        let authAccount = this.state.auth;
+        let accountTo = this.state.account;
+        await giveToken(authAccount, accountTo, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
+        await this.updateBalance();
+        await this.updateTokens();
+        console.log("Given Token")
+    }
+
+    async updateListings() {
+        
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let listingIDs = await getCurrentListingIds();
+        //console.log(listingIDs);
+        let listings = [];
+        for (let i = 0; i < listingIDs.length; ++i) {
+            let id = listingIDs[i];
+            let data = await getListingData(id);
+            console.log(data[3]);
+            if (data != null && !data[3]) {
+                listings.push({
+                    id: data[0],
+                    price: data[1],
+                    tokenId: data[2],
+                    stats: {
+                        stamina: data[4],
+                        strength: data[5],
+                        elusive: data[6],
+                    }
+                });
+            }
+        }
+
+        this.setState({listings: listings});
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
@@ -98,21 +182,47 @@ class App extends React.Component {
     tabClicked(tab) {
         this.setState({tab: tab});
     }
-    
+
     render() {
         let app = this;
 
         return (
             <div>
                 <Menu switchTab={this.tabClicked} />
-                {this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView account={app.state.account} tokens={app.state.tokens} /> : null}
-                {this.state.tab === CURRENT_INTERFACE.MARKET ?
-                    <MarketView /> : null}
-                {this.state.tab === CURRENT_INTERFACE.TRAINING ?
-                    <TrainingView /> : null}
-                {this.state.tab === CURRENT_INTERFACE.LOBBY ?
-                    <LobbyView /> : null}
+                {
+                    this.state.tab === CURRENT_INTERFACE.LIBRARY ?
+                    <LibraryView
+                        account={app.state.account}
+                        tokens={app.state.tokens}
+                        mintToken={this.mintToken}
+                        updateListings={this.updateListings}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.MARKET ?
+                    <MarketView
+                        account={this.state.account}
+                        tokens={this.state.tokens}
+                        listings={this.state.listings}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.TRAINING ?
+                    <TrainingView
+                        tokens={app.state.tokens}
+                    />
+                    : null
+                }
+
+                {
+                    this.state.tab === CURRENT_INTERFACE.LOBBY ?
+                    <LobbyView />
+                    : null
+                }
             </div>
         );
     }
