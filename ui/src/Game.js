@@ -43,8 +43,8 @@ export const getListingData = async (listingId) => (await playerMethods.getListi
 
 export const getCurrentListingIds = async () => (await playerMethods.getCurrentListingIds().call());
 
-export const addListing = async (listingId, amount) => {
-    let contractMethod = playerMethods.addListing(listingId, amount);
+export const addListing = async (tokenId, amount) => {
+    let contractMethod = playerMethods.addListing(tokenId, amount);
     const transactionParameters = {
         from: window.ethereum.selectedAddress,
         to: playerTokenContract._address,
@@ -52,28 +52,10 @@ export const addListing = async (listingId, amount) => {
     };
 
     //returns tx Hash
-
     return await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
-
-
-};
-
-export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
-
-export const trainToken = async (from, tokenId, newStats) => {
-    await burnToken(from, tokenId);
-    await giveToken(from, from, newStats)
-}
-
-export const isValidAddress = (address) => (address !== undefined && address !== '0x');
-
-export const randInt = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.ceil(max);
-    return Math.floor(Math.random() * (max - min) + min);
 };
 
 export const purchaseToken = async (listingId, price) => {
@@ -91,4 +73,19 @@ export const purchaseToken = async (listingId, price) => {
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
+};
+
+export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
+
+export const trainToken = async (from, tokenId, newStats) => {
+    await burnToken(from, tokenId);
+    await giveToken(from, from, newStats)
+}
+
+export const isValidAddress = (address) => (address !== undefined && address !== '0x');
+
+export const randInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.ceil(max);
+    return Math.floor(Math.random() * (max - min) + min);
 };

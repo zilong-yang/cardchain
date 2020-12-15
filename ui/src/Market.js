@@ -8,8 +8,8 @@ export default class MarketView extends React.Component {
         super(props);
 
         this.state = {
-            account: this.props.account,
-            listings: this.props.listings,
+            account: this.props.app.state.account,
+            listings: this.props.app.state.listings,
         };
 
         this.buyToken = this.buyToken.bind(this);
@@ -23,7 +23,9 @@ export default class MarketView extends React.Component {
     async handleTokenPurchase(listingId, price) {
         await purchaseToken(listingId, price);
 
-        // TODO: update UI after purchase
+        await this.props.app.updateListings();
+        await this.props.app.updateTokens();
+        await this.props.app.updateTrainable();
     }
 
     render() {

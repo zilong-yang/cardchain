@@ -26,7 +26,7 @@ const CURRENT_INTERFACE = {
     LOBBY: 'lobby'
 };
 
-const shortAddress = (address) => (address.substr(0, 6) + "...");
+// const shortAddress = (address) => (address.substr(0, 6) + "...");
 
 class App extends React.Component {
     constructor(props) {
@@ -115,10 +115,16 @@ class App extends React.Component {
         let acc = this.state.account;
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
-        let listingIDs = await getCurrentListingIds();
+        // put all listing IDs into a set to avoid duplicates
+        let listingIDs = new Set();
+        for (let id of await getCurrentListingIds()) {
+            listingIDs.add(id);
+        }
+
+        // populate listings in state
         let listings = [];
-        for (let i = 0; i < listingIDs.length; ++i) {
-            let id = listingIDs[i];
+        for (let id of listingIDs) {
+            // let id = listingIDs[i];
             let data = await getListingData(id);
 
             if (data != null && !data[3]) {
@@ -173,9 +179,6 @@ class App extends React.Component {
                 {
                     this.state.tab === CURRENT_INTERFACE.MARKET ?
                     <MarketView
-                        account={this.state.account}
-                        tokens={this.state.tokens}
-                        listings={this.state.listings}
                         app={this}
                     />
                     : null
