@@ -57,9 +57,8 @@ class App extends React.Component {
         await this.updateTokens();
         await this.updateListings();
     }
-
     async updateAddress() {
-        let accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+        let accounts = await window.web3.eth.getAccounts();
         console.assert(accounts !== undefined && accounts.length > 0, "Invalid accounts");
 
         this.setState({account: accounts[0]});
@@ -67,7 +66,6 @@ class App extends React.Component {
     }
 
     async updateBalance() {
-        
         let accountTo = this.state.account;
         console.log(this.state.account);
         console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
@@ -144,6 +142,41 @@ class App extends React.Component {
         }
 
         this.setState({listings: listings});
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let balance = await balanceOf(acc);
+        this.setState({balance: balance});
+
+        if (balance === 0) {
+            await giveToken(acc, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
+            await this.updateBalance();
+        }
+
+        return balance;
+    }
+
+    async updateTokens() {
+        let acc = this.state.account;
+        console.assert(isValidAddress(acc), "Invalid account: " + acc);
+
+        let tokenIDs = await tokensOfOwner(acc);
+        let tokens = [];
+        for (let i = 0; i < tokenIDs.length; ++i) {
+            let id = tokenIDs[i];
+            let stats = await getStats((id));
+            tokens.push({
+                id: id,
+                name: "token " + id,
+                stats: {
+                    stamina: stats[0],
+                    strength: stats[1],
+                    elusive: stats[2],
+                },
+            });
+        }
+
+        this.setState({tokens: tokens});
     }
 
     tabClicked(tab) {

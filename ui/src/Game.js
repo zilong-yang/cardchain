@@ -76,5 +76,4 @@ export const purchaseToken = async (listingId, price) => {
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
-
 };
