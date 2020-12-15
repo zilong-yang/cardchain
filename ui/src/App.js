@@ -1,12 +1,12 @@
 import React from 'react';
 
-import {Menu} from "./Menu";
-import {LibraryView} from "./Library";
+import { Menu } from "./Menu";
+import { LibraryView } from "./Library";
 import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import {headAuthority} from "./config";
+import { headAuthority } from "./config";
 import {
     balanceOf,
     getCurrentListingIds,
@@ -64,6 +64,7 @@ class App extends React.Component {
 
     async updateBalance() {
         let accountTo = this.state.account;
+        console.log(this.state.account);
         console.assert(isValidAddress(accountTo), "Invalid account: " + accountTo);
 
         let balance = await balanceOf(accountTo);
@@ -81,6 +82,7 @@ class App extends React.Component {
         console.assert(isValidAddress(acc), "Invalid account: " + acc);
 
         let tokenIDs = await tokensOfOwner(acc);
+        console.log(tokenIDs);
         let tokens = [];
         for (let i = 0; i < tokenIDs.length; ++i) {
             let id = tokenIDs[i];
@@ -106,7 +108,7 @@ class App extends React.Component {
 
         await this.updateBalance();
         await this.updateTokens();
-        await this.updateTrainable();
+        console.log("Given Token")
     }
 
     async updateListings() {

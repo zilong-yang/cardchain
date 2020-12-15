@@ -16,7 +16,7 @@ export const sendSignedTx = async (from, contractMethod, value) => {
     };
 
     const tx = NETWORK_TYPE === 'private' ? new Tx(txObject) : new Tx(txObject, {'chain': 'ropsten'});
-    tx.sign(Buffer.from(headAuthorityAccount.privateKey, 'hex')); // TODO: should use current user's private key
+    tx.sign(Buffer.from(headAuthorityAccount.privateKey, 'hex'));
 
     const serializedTx = tx.serialize();
     const raw = '0x' + serializedTx.toString('hex');
@@ -39,16 +39,26 @@ export const tokensOfOwner = async (owner) => (await playerMethods.tokensOfOwner
 
 export const totalSupply = async () => (await playerMethods.totalSupply().call());
 
-export const addListing = async (from, tokenId, amount) => {
-    await sendSignedTx(from, playerMethods.addListing(tokenId, amount), 0);
-};
-
 export const getListingData = async (listingId) => (await playerMethods.getListingData(listingId).call());
 
 export const getCurrentListingIds = async () => (await playerMethods.getCurrentListingIds().call());
 
-export const purchaseToken = async (from, listingId, price) => {
-    await sendSignedTx(from, playerMethods.purchaseToken(listingId), price);
+export const addListing = async (listingId, amount) => {
+    let contractMethod = playerMethods.addListing(listingId, amount);
+    const transactionParameters = {
+        from: window.ethereum.selectedAddress,
+        to: playerTokenContract._address,
+        data: contractMethod.encodeABI(),
+    };
+
+    //returns tx Hash
+
+    return await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+    })
+
+
 };
 
 export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
@@ -64,4 +74,21 @@ export const randInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.ceil(max);
     return Math.floor(Math.random() * (max - min) + min);
+};
+
+export const purchaseToken = async (listingId, price) => {
+
+    let contractMethod = playerMethods.purchaseToken(listingId);
+    const transactionParameters = {
+        from: window.ethereum.selectedAddress,
+        to: playerTokenContract._address,
+        data: contractMethod.encodeABI(),
+        value: window.web3.utils.toHex(price),
+    };
+
+    //returns tx Hash
+    return await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+    })
 };

@@ -69,10 +69,7 @@ contract PlayerToken is ERC721Full {
     }
 
     //Returns given ListingId listing
-    //returns integer array of structure (listingId, tokenId, price, (stats))
-    //stats are in same order as with previous implementations
     function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
-        //require(currentListings[listingId], "Listing is not currently active");
         Listing storage listing = listings[listingId];
         uint8[] memory stats = _getStats(listing.tokenId);
 
@@ -81,8 +78,6 @@ contract PlayerToken is ERC721Full {
     }
 
     // returns list of current Listing Ids
-    // This is inefficient. It returns the whole history of listings, both active and inactive. In the DApp, it
-    // relies on getListingData to throw and error when it detects the listing is not active.
     function getCurrentListingIds() public view authorize returns (uint256[] memory){
         return listingIds;
     }
@@ -93,10 +88,9 @@ contract PlayerToken is ERC721Full {
         Listing storage listing = listings[listingId];
         require(listing.price <= msg.value, "Must pay the full listing amount");
         require(msg.sender != listing.lister, "Lister cannot buy own listing");
-        //require(getApproved(tempListing.tokenId)==address(this), "Contract must  be approved account on Token for Transfer");
 
-        //UNSAFE, Should have all transfer methods in separate contract, then call that from this contract
-        //Needed to change so that it does not check for msg.sender to be the token owner or approved because the buyer is not approved or owner. 
+
+
         transferFromNoRequirement(listing.lister, msg.sender, listing.tokenId);
         listing.lister.transfer(listing.price);
 
