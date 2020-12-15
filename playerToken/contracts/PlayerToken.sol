@@ -69,16 +69,25 @@ contract PlayerToken is ERC721Full {
     }
 
     //Returns given ListingId listing
-    function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
+    function getListingData(uint256 listingId) public view returns (uint, uint, uint, bool, uint, uint, uint) {
         Listing storage listing = listings[listingId];
-        uint8[] memory stats = _getStats(listing.tokenId);
+        uint8[] memory stats;
+        if (_exists(listing.tokenId)) {
+            stats = _getStats(listing.tokenId);
+        } else {
+            stats = new uint8[](3);
+            stats[0] = 0;
+            stats[1] = 0;
+            stats[2] = 0;
+        }
+
 
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
 
     }
 
     // returns list of current Listing Ids
-    function getCurrentListingIds() public view authorize returns (uint256[] memory){
+    function getCurrentListingIds() public view returns (uint256[] memory){
         return listingIds;
     }
 
@@ -98,7 +107,7 @@ contract PlayerToken is ERC721Full {
         listedTokens[listing.tokenId] = false;
         currentListings[listingId] = false;
         listing.sold = true;
-        listingIdCounter--;
+//        listingIdCounter--;
     }
 
     function isListed(uint256 tokenId) public view returns (bool) {
@@ -114,7 +123,7 @@ contract PlayerToken is ERC721Full {
     }
 
     //create new PlayerTokens
-    function mint(address _to, uint8[3] memory stats) public authorize returns (uint256) {
+    function mint(address _to, uint8[3] memory stats) public returns (uint256) {
         // increment the current ID
         lastTokenId++;
 
@@ -129,6 +138,11 @@ contract PlayerToken is ERC721Full {
         _burn(msg.sender, tokenId);
     }
 
+    function trainToken(uint tokenId, uint8[3] memory newStats) public returns (uint) {
+        burn(tokenId);
+        return mint(msg.sender, newStats);
+    }
+
     //Change the stats of a given token, must be authorized account
     function changeStats(uint256 tokenId, uint8[3] memory stats) internal authorize {
         //dont really need this unless we do something before calling this
@@ -136,7 +150,7 @@ contract PlayerToken is ERC721Full {
     }
 
     // Returns a list of tokenIDs owned by owner
-    function tokensOfOwner(address owner) public view authorize returns (uint256[] memory) {
+    function tokensOfOwner(address owner) public view returns (uint256[] memory) {
         return _tokensOfOwner(owner);
     }
 

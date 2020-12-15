@@ -121,6 +121,7 @@ class App extends React.Component {
             listingIDs.add(id);
         }
 
+        console.log(listingIDs);
         // populate listings in state
         let listings = [];
         for (let id of listingIDs) {

@@ -25,11 +25,25 @@ export const sendSignedTx = async (from, contractMethod, value) => {
     return (await window.web3.eth.sendSignedTransaction(raw, console.log)).transactionHash;
 };
 
+export const sendMetamaskTx = async (contractMethod, value) => {
+    const txParams = {
+        from: window.ethereum.selectedAddress,
+        to: playerTokenContract._address,
+        data: contractMethod.encodeABI(),
+        value: window.web3.utils.toHex(value),
+    }
+
+    return await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+    });
+}
+
 export const giveToken = async (account, to, stats) =>
-    (await sendSignedTx(account, playerMethods.mint(to, stats), 0));
+    (await sendMetamaskTx(playerMethods.mint(to, stats), 0));
 
 export const burnToken = async (owner, tokenId) =>
-    (await sendSignedTx(owner, playerMethods.burn(tokenId), 0))
+    (await sendMetamaskTx(playerMethods.burn(tokenId), 0))
 
 export const balanceOf = async (address) => (Number(await playerMethods.balanceOf(address).call()));
 
@@ -78,8 +92,7 @@ export const purchaseToken = async (listingId, price) => {
 export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
 
 export const trainToken = async (from, tokenId, newStats) => {
-    await burnToken(from, tokenId);
-    await giveToken(from, from, newStats)
+    await sendMetamaskTx(playerMethods.trainToken(tokenId, newStats), 0);
 }
 
 export const isValidAddress = (address) => (address !== undefined && address !== '0x');
