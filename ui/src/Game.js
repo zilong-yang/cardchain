@@ -25,9 +25,25 @@ export const sendSignedTx = async (from, contractMethod, value) => {
     return (await window.web3.eth.sendSignedTransaction(raw, console.log)).transactionHash;
 };
 
-export const giveToken = async (from, to, stats) => {
-    await sendSignedTx(from, playerMethods.mint(to, "", stats), 0);
-};
+export const sendMetamaskTx = async (contractMethod, value) => {
+    const txParams = {
+        from: window.ethereum.selectedAddress,
+        to: playerTokenContract._address,
+        data: contractMethod.encodeABI(),
+        value: window.web3.utils.toHex(value),
+    }
+
+    return await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+    });
+}
+
+export const giveToken = async (account, to, stats) =>
+    (await sendMetamaskTx(playerMethods.mint(to, stats), 0));
+
+export const burnToken = async (owner, tokenId) =>
+    (await sendMetamaskTx(playerMethods.burn(tokenId), 0))
 
 export const balanceOf = async (address) => (Number(await playerMethods.balanceOf(address).call()));
 
@@ -41,8 +57,8 @@ export const getListingData = async (listingId) => (await playerMethods.getListi
 
 export const getCurrentListingIds = async () => (await playerMethods.getCurrentListingIds().call());
 
-export const addListing = async (listingId, amount) => {
-    let contractMethod = playerMethods.addListing(listingId, amount);
+export const addListing = async (tokenId, amount) => {
+    let contractMethod = playerMethods.addListing(tokenId, amount);
     const transactionParameters = {
         from: window.ethereum.selectedAddress,
         to: playerTokenContract._address,
@@ -50,19 +66,14 @@ export const addListing = async (listingId, amount) => {
     };
 
     //returns tx Hash
-    
     return await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
-
-
 };
 
-export const isValidAddress = (address) => (address !== undefined && address !== '0x');
-
 export const purchaseToken = async (listingId, price) => {
-    
+
     let contractMethod = playerMethods.purchaseToken(listingId);
     const transactionParameters = {
         from: window.ethereum.selectedAddress,
@@ -76,4 +87,18 @@ export const purchaseToken = async (listingId, price) => {
         method: 'eth_sendTransaction',
         params: [transactionParameters],
     })
+};
+
+export const isListed = async (tokenId) => (await playerMethods.isListed(tokenId).call());
+
+export const trainToken = async (from, tokenId, newStats) => {
+    await sendMetamaskTx(playerMethods.trainToken(tokenId, newStats), 0);
+}
+
+export const isValidAddress = (address) => (address !== undefined && address !== '0x');
+
+export const randInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.ceil(max);
+    return Math.floor(Math.random() * (max - min) + min);
 };

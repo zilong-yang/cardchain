@@ -28,7 +28,8 @@ export class LibraryView extends React.Component {
 
     async handleTokenToMarket(tokenId, tokenPrice) {
         await addListing(tokenId, tokenPrice);
-        await this.props.updateListings();
+        await this.props.app.updateListings();
+        await this.props.app.updateTrainable();
     }
 
     setListingPrice(event) {
@@ -40,11 +41,11 @@ export class LibraryView extends React.Component {
     }
 
     buttonMint() {
-        this.props.mintToken();
+        this.props.app.mintToken();
     }
 
     render() {
-        let tokens = this.props.tokens.map((token, i) => {
+        let tokens = this.props.app.state.tokens.map((token, i) => {
             return (
                 <tr key={i}>
                     <th>{token.name}</th>
@@ -52,15 +53,13 @@ export class LibraryView extends React.Component {
                     <th>{token.stats['strength']}</th>
                     <th>{token.stats['elusive']}</th>
                     <th>{token.id}</th>
-                   
-                    
                 </tr>
             )
         });
 
         return (
             <div>
-                <h1 align="center">Account: {this.props.account}</h1>
+                <h1 align="center">Account: {this.props.app.state.account}</h1>
                 <div id="library-table-div">
                     <table id="library-table">
                         <thead>
@@ -70,7 +69,6 @@ export class LibraryView extends React.Component {
                                 <th>Strength</th>
                                 <th>Elusive</th>
                                 <th>ID</th>
-                             
                             </tr>
                         </thead>
                         <tbody>

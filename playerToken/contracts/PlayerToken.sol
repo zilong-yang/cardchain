@@ -5,18 +5,21 @@ import "./ERC721Full.sol";
 contract PlayerToken is ERC721Full {
 
     struct Listing {
-        uint256 id;
-        uint price;
-        address payable lister;
-        uint256 tokenId;
-        //uint256 tokenIndex;
-        bool sold;
+        uint256 id; // ID of this listing
+        uint price; // price of this listing
+        address payable lister; // lister's address
+        uint256 tokenId; // ID of the listed token
+        bool sold; // whether this token has already been sold
     }
 
     //head authority, only account that can add authorized accounts
     address private authority;
+
     //only authorized accounts can change token variables
     mapping(address => bool) authorizedAccounts;
+
+    // the last token's ID on the blockchain; should never be decremented
+    uint256 private lastTokenId;
 
     //tokenId => isListed
     mapping(uint256 => bool) listedTokens;
@@ -30,13 +33,13 @@ contract PlayerToken is ERC721Full {
     //array of listing's ids. Has removed listing Ids too.
     uint256[] private listingIds;
 
-    
-
+    // current number of listings
     uint256 private listingIdCounter;
 
     constructor(address _authority) ERC721Full("PlayerToken", "PTOKEN") public {
         authority = _authority;
         authorizedAccounts[_authority] = true;
+        lastTokenId = 0;
         listingIdCounter = 0;
     }
 
@@ -65,21 +68,26 @@ contract PlayerToken is ERC721Full {
 
     }
 
-
     //Returns given ListingId listing
-    function getListingData(uint256 listingId) public view authorize returns (uint, uint, uint, bool, uint, uint, uint){
-        
+    function getListingData(uint256 listingId) public view returns (uint, uint, uint, bool, uint, uint, uint) {
         Listing storage listing = listings[listingId];
-        
-        uint8[] memory stats = _getStats(listing.tokenId);
-        
+        uint8[] memory stats;
+        if (_exists(listing.tokenId)) {
+            stats = _getStats(listing.tokenId);
+        } else {
+            stats = new uint8[](3);
+            stats[0] = 0;
+            stats[1] = 0;
+            stats[2] = 0;
+        }
+
 
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
 
     }
 
     // returns list of current Listing Ids
-    function getCurrentListingIds() public view authorize returns (uint256[] memory){
+    function getCurrentListingIds() public view returns (uint256[] memory){
         return listingIds;
     }
 
@@ -89,9 +97,9 @@ contract PlayerToken is ERC721Full {
         Listing storage listing = listings[listingId];
         require(listing.price <= msg.value, "Must pay the full listing amount");
         require(msg.sender != listing.lister, "Lister cannot buy own listing");
-        
 
-        
+
+
         transferFromNoRequirement(listing.lister, msg.sender, listing.tokenId);
         listing.lister.transfer(listing.price);
 
@@ -99,7 +107,11 @@ contract PlayerToken is ERC721Full {
         listedTokens[listing.tokenId] = false;
         currentListings[listingId] = false;
         listing.sold = true;
-        
+//        listingIdCounter--;
+    }
+
+    function isListed(uint256 tokenId) public view returns (bool) {
+        return listedTokens[tokenId];
     }
 
     modifier authorize{
@@ -111,27 +123,34 @@ contract PlayerToken is ERC721Full {
     }
 
     //create new PlayerTokens
-    function mint(address _to, string memory _tokenURI, uint8[3] memory stats) public authorize returns (bool){
-        //id is the number of token (mint number)
-        uint256 _tokenId = totalSupply().add(1);
+    function mint(address _to, uint8[3] memory stats) public returns (uint256) {
+        // increment the current ID
+        lastTokenId++;
 
-        // new method to mint
-        _mint(_to, _tokenId);
-        changeStats(_tokenId, stats);
-        _setTokenURI(_tokenId, _tokenURI);
+        //call IERC721Enumerable mint function to mint a new token
+        _mintWithStats(_to, lastTokenId, stats);
 
+        return lastTokenId;
+    }
 
-        return true;
+    function burn(uint256 tokenId) public {
+        // call _burn in ERC721Enumerable
+        _burn(msg.sender, tokenId);
+    }
+
+    function trainToken(uint tokenId, uint8[3] memory newStats) public returns (uint) {
+        burn(tokenId);
+        return mint(msg.sender, newStats);
     }
 
     //Change the stats of a given token, must be authorized account
-    function changeStats(uint256 tokenId, uint8[3] memory stats) public authorize {
+    function changeStats(uint256 tokenId, uint8[3] memory stats) internal authorize {
         //dont really need this unless we do something before calling this
         _changeStats(tokenId, stats);
     }
 
     // Returns a list of tokenIDs owned by owner
-    function tokensOfOwner(address owner) public view authorize returns (uint256[] memory) {
+    function tokensOfOwner(address owner) public view returns (uint256[] memory) {
         return _tokensOfOwner(owner);
     }
 

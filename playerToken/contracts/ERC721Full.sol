@@ -384,7 +384,7 @@ contract ERC721 is ERC165, IERC721 {
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     // mapping of tokenID to stats struct
-    mapping(uint256 => stats) private _tokenStats;
+    mapping(uint256 => stats) internal _tokenStats;
 
     /*
      *     bytes4(keccak256('balanceOf(address)')) == 0x70a08231
@@ -609,22 +609,6 @@ contract ERC721 is ERC165, IERC721 {
         emit Transfer(address(0), to, tokenId);
     }
 
-    function _mintWithStats(address to, uint256 tokenId, uint8[3] memory statPoints) internal {
-        require(to != address(0), "ERC721: mint to the zero address");
-        require(!_exists(tokenId), "ERC721: token already minted");
-
-        _tokenOwner[tokenId] = to;
-        _ownedTokensCount[to].increment();
-
-
-        emit Transfer(address(0), to, tokenId);
-
-        _tokenStats[tokenId].stamina = statPoints[0];
-        _tokenStats[tokenId].strength = statPoints[1];
-        _tokenStats[tokenId].elusive = statPoints[2];
-
-    }
-
     /**
      * @dev Internal function to burn a specific token.
      * Reverts if the token does not exist.
@@ -823,6 +807,17 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         _addTokenToOwnerEnumeration(to, tokenId);
 
         _addTokenToAllTokensEnumeration(tokenId);
+    }
+
+
+    function _mintWithStats(address to, uint256 tokenId, uint8[3] memory statPoints) internal {
+        _mint(to, tokenId);
+
+        // set stats of new token
+        _tokenStats[tokenId].stamina = statPoints[0];
+        _tokenStats[tokenId].strength = statPoints[1];
+        _tokenStats[tokenId].elusive = statPoints[2];
+
     }
 
     /**
