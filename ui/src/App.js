@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { Menu } from "./Menu";
-import { LibraryView } from "./Library";
+import {Menu} from "./Menu";
+import {LibraryView} from "./Library";
 import MarketView from "./Market";
 import TrainingView from './Training';
 import LobbyView from "./Lobby";
 
-import { headAuthority } from "./config";
+import {headAuthority} from "./config";
 import {
     balanceOf,
     getCurrentListingIds,
@@ -35,7 +35,7 @@ class App extends React.Component {
         this.state = {
             tab: CURRENT_INTERFACE.LIBRARY,
             account: '0x',
-            auth : headAuthority,
+            auth: headAuthority,
             balance: -1,
 
             tokens: [],
@@ -71,9 +71,9 @@ class App extends React.Component {
         this.setState({balance: balance});
 
         console.log("balance = " + balance)
-        if (balance === 0) {
-            await this.mintToken(); 
-        }
+        // if (balance === 0) {
+        //     await this.mintToken();
+        // }
         return balance;
     }
 
@@ -101,7 +101,7 @@ class App extends React.Component {
         this.setState({tokens: tokens});
     }
 
-    async mintToken(){
+    async mintToken() {
         let authAccount = this.state.auth;
         let accountTo = this.state.account;
         await giveToken(authAccount, accountTo, [randInt(1, 10), randInt(1, 10), randInt(1, 10)]);
@@ -125,7 +125,6 @@ class App extends React.Component {
         // populate listings in state
         let listings = [];
         for (let id of listingIDs) {
-            // let id = listingIDs[i];
             let data = await getListingData(id);
 
             if (data != null && !data[3]) {
@@ -168,35 +167,29 @@ class App extends React.Component {
     render() {
         return (
             <div>
-                <Menu switchTab={this.tabClicked} />
+                <Menu switchTab={this.tabClicked}/>
                 {
                     this.state.tab === CURRENT_INTERFACE.LIBRARY ?
-                    <LibraryView
-                        app={this}
-                    />
-                    : null
+                        <LibraryView app={this}/>
+                        : null
                 }
 
                 {
                     this.state.tab === CURRENT_INTERFACE.MARKET ?
-                    <MarketView
-                        app={this}
-                    />
-                    : null
+                        <MarketView app={this}/>
+                        : null
                 }
 
                 {
                     this.state.tab === CURRENT_INTERFACE.TRAINING ?
-                    <TrainingView
-                        app={this}
-                    />
-                    : null
+                        <TrainingView app={this}/>
+                        : null
                 }
 
                 {
                     this.state.tab === CURRENT_INTERFACE.LOBBY ?
-                    <LobbyView />
-                    : null
+                        <LobbyView/>
+                        : null
                 }
             </div>
         );
