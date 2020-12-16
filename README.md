@@ -37,7 +37,16 @@ CardChain is a trading card-based platform based on blockchain technologies and 
     - A website should automatically pop up in a minute; otherwise, go to [localhost](http://localhost:3000) at port 3000
     
 ### Ropsten Testnet
-**Coming soon~**
+1. Clone this repo and install dependencies
+    ```
+    > git clone git@github.com:zilong-yang/cardchain.git
+    > cd cardchain
+    > npm install
+    ```
+
+2. Go into the *ui* folder and run `npm start`. You should be able to see the application. Test if it has successfully connected to the contract on Ropsten by clicking on *Marketplace* and you should be able to see some listed tokens.
+
+3. Have fun!
 
 ## Demo Video
 [CardChain Tutorial](https://youtu.be/Q1tRq7YqV8Y)
