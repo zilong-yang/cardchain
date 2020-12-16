@@ -50,6 +50,7 @@ contract PlayerToken is ERC721Full {
         require(ownerOf(tokenId) == msg.sender, "Lister must own Token");
         require(!listedTokens[tokenId], "Token must not already be listed.");
 
+        // mark token as listed
         listedTokens[tokenId] = true;
 
         //Increment and set unique listing id (There is a better way to do this with enumerable interface I believe)
@@ -71,6 +72,8 @@ contract PlayerToken is ERC721Full {
     //Returns given ListingId listing
     function getListingData(uint256 listingId) public view returns (uint, uint, uint, bool, uint, uint, uint) {
         Listing storage listing = listings[listingId];
+
+        // get stats of listed token if it exists, otherwise fill with placeholders
         uint8[] memory stats;
         if (_exists(listing.tokenId)) {
             stats = _getStats(listing.tokenId);
@@ -81,9 +84,7 @@ contract PlayerToken is ERC721Full {
             stats[2] = 0;
         }
 
-
         return (listing.id, listing.price, listing.tokenId, listing.sold, stats[0], stats[1], stats[2]);
-
     }
 
     // returns list of current Listing Ids
@@ -98,8 +99,6 @@ contract PlayerToken is ERC721Full {
         require(listing.price <= msg.value, "Must pay the full listing amount");
         require(msg.sender != listing.lister, "Lister cannot buy own listing");
 
-
-
         transferFromNoRequirement(listing.lister, msg.sender, listing.tokenId);
         listing.lister.transfer(listing.price);
 
@@ -107,7 +106,6 @@ contract PlayerToken is ERC721Full {
         listedTokens[listing.tokenId] = false;
         currentListings[listingId] = false;
         listing.sold = true;
-//        listingIdCounter--;
     }
 
     function isListed(uint256 tokenId) public view returns (bool) {

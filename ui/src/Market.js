@@ -11,13 +11,6 @@ export default class MarketView extends React.Component {
             account: this.props.app.state.account,
             listings: this.props.app.state.listings,
         };
-
-        this.buyToken = this.buyToken.bind(this);
-    }
-
-   
-    buyToken(id) {
-        console.log(id);
     }
 
     async handleTokenPurchase(listingId, price) {
@@ -30,7 +23,6 @@ export default class MarketView extends React.Component {
 
     render() {
         let listings = this.state.listings.map((listing, i) => {
-            // TODO: disable Buy button for those that are listed by current user
             return (
                 <tr key={i}>
                     <th>{listing.id}</th>
